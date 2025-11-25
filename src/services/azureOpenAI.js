@@ -10,8 +10,8 @@ const API_VERSION = import.meta.env.VITE_AZURE_OPENAI_API_VERSION;
 // ============================================
 
 // Token & Cost Control
-const MAX_TOKENS_PER_REQUEST = 500;        // Limit tokens per response (COST CONTROL)
-const MAX_INPUT_CHARS = 4000;              // Max characters in user input
+const MAX_TOKENS_PER_REQUEST = 4000;       // Limit tokens per response (allows full answers)
+const MAX_INPUT_CHARS = 8000;              // Max characters in user input
 const MAX_MESSAGES_HISTORY = 10;           // Limit conversation history (prevents token bloat)
 
 // Rate Limiting (DDoS Protection)

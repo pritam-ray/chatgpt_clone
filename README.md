@@ -1,160 +1,257 @@
-# Azure OpenAI Chatbot 🤖
+# AI Chatbot with Azure OpenAI Integration
 
-A **secure, cost-optimized** React chatbot with Azure OpenAI integration, file uploads, and comprehensive protection.
+A modern, feature-rich AI chatbot application built with React, TypeScript, and Azure OpenAI, featuring advanced markdown rendering, mathematical equation support, and PDF file processing capabilities.
 
-## 🔒 Security & Cost Protection
+![AI Chatbot](https://img.shields.io/badge/React-18.3-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)
+![Vite](https://img.shields.io/badge/Vite-5.4-purple)
+![Azure OpenAI](https://img.shields.io/badge/Azure%20OpenAI-API-green)
 
-✅ **DDoS Protection** - Rate limiting (15/min, 100/hour)  
-✅ **Token Limits** - Max 500 tokens per response (cost control)  
-✅ **Input Sanitization** - XSS and injection prevention  
-✅ **No Data Leaks** - Credential redaction in error messages  
-✅ **File Security** - Size validation (2MB) & type whitelist  
+## ✨ Features
 
-📖 **[Full Security Documentation →](SECURITY.md)**
+### 🤖 AI Capabilities
+- **Streaming Responses**: Real-time streaming chat completions from Azure OpenAI
+- **Context-Aware Conversations**: Maintains conversation history for contextual responses
+- **Advanced Markdown Rendering**: Full support for GitHub Flavored Markdown (GFM)
+- **Mathematical Equations**: Render inline and display math equations using KaTeX
+- **Table Support**: Beautiful, responsive tables with custom styling
+- **Code Syntax Highlighting**: Enhanced code blocks with copy-to-clipboard functionality
 
-## 🔑 Required Credentials
+### 📄 File Processing
+- **PDF Support**: Extract and process text from PDF files
+- **Multiple File Types**: Support for various document formats (PDF, TXT, DOC, DOCX)
+- **Smart Text Extraction**: Automatically extracts text from attachments for AI context
+- **Privacy-Focused UI**: Extracted text is sent to AI but not displayed in the chat interface
 
-To run this chatbot, you need the following Azure OpenAI credentials:
+### 🎨 Premium UI/UX
+- **Modern Design**: Sleek, professional interface with gradient accents
+- **Glass Morphism Effects**: Sophisticated backdrop blur and transparency effects
+- **Responsive Layout**: Fully responsive design that works on all devices
+- **Smooth Animations**: Polished transitions and hover effects
+- **Copy Code Buttons**: One-click code copying with visual feedback
+- **Custom Scrollbars**: Styled scrollbars matching the theme
 
-### 1. **Azure OpenAI Resource Endpoint**
-   - **What it is:** The URL of your Azure OpenAI resource
-   - **Format:** `https://YOUR-RESOURCE-NAME.openai.azure.com`
-   - **Where to find it:**
-     1. Go to [Azure Portal](https://portal.azure.com)
-     2. Navigate to your Azure OpenAI resource
-     3. Click on "Keys and Endpoint" in the left menu
-     4. Copy the "Endpoint" value
+## 🚀 Getting Started
 
-### 2. **Azure OpenAI API Key**
-   - **What it is:** Authentication key to access your Azure OpenAI resource
-   - **Format:** A long string of characters (e.g., `abc123def456...`)
-   - **Where to find it:**
-     1. In the same "Keys and Endpoint" section
-     2. Copy either "KEY 1" or "KEY 2"
-     3. ⚠️ **Keep this secret!** Never commit it to version control
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- Azure OpenAI API access
 
-### 3. **Deployment Name**
-   - **What it is:** The name you assigned to your model deployment
-   - **Format:** Any name you chose (e.g., `gpt-4`, `my-gpt-35-turbo`)
-   - **Where to find it:**
-     1. In Azure Portal, go to your Azure OpenAI resource
-     2. Click on "Model deployments" or go to Azure OpenAI Studio
-     3. You'll see a list of your deployments with their names
-     4. Use the exact deployment name (case-sensitive)
+### Installation
 
-### 4. **API Version**
-   - **What it is:** The version of the Azure OpenAI API to use
-   - **Recommended:** `2024-08-01-preview` (or latest from [Azure docs](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference))
-   - **Format:** `YYYY-MM-DD-preview` or `YYYY-MM-DD`
-
----
-
-## 🚀 Setup Instructions
-
-### Step 1: Install Dependencies
-```powershell
-npm install
-```
-
-### Step 2: Configure Environment Variables
-1. Copy the `.env.example` file to create your `.env`:
-   ```powershell
-   Copy-Item .env.example .env
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/pritam-ray/chatbot.git
+   cd chatbot
    ```
 
-2. Open `.env` and replace the placeholder values with your actual credentials:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**
+   
+   Create a `.env` file in the root directory:
    ```env
-   VITE_AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com
-   VITE_AZURE_OPENAI_API_KEY=your-actual-api-key-here
-   VITE_AZURE_OPENAI_DEPLOYMENT_NAME=your-deployment-name
-   VITE_AZURE_OPENAI_API_VERSION=2024-08-01-preview
+   VITE_AZURE_OPENAI_API_KEY=your_api_key_here
+   VITE_AZURE_OPENAI_ENDPOINT=your_endpoint_here
+   VITE_AZURE_OPENAI_DEPLOYMENT_NAME=your_deployment_name
    ```
 
-### Step 3: Run the Application
-```powershell
-npm run dev
-```
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-The chatbot will open at `http://localhost:3000`
+5. **Open your browser**
+   
+   Navigate to `http://localhost:5173`
 
----
+## 🛠️ Technology Stack
+
+### Core Framework
+- **React 18.3** - Modern UI library with hooks
+- **TypeScript 5.5** - Type-safe development
+- **Vite 5.4** - Lightning-fast build tool
+
+### Styling
+- **TailwindCSS 3.4** - Utility-first CSS framework
+- **PostCSS** - CSS transformations
+- **Custom CSS** - Enhanced markdown and math styling
+
+### AI & Processing
+- **Azure OpenAI** - Advanced language model integration
+- **pdf.js** - PDF text extraction
+- **marked** - Markdown parsing
+- **DOMPurify** - HTML sanitization
+- **KaTeX** - Mathematical equation rendering
+
+### UI Components
+- **Lucide React** - Beautiful icon library
 
 ## 📁 Project Structure
+
 ```
+chatbot/
 ├── src/
-│   ├── App.jsx              # Main chatbot component
-│   ├── App.css              # Chatbot styling
-│   ├── main.jsx             # React entry point
-│   ├── index.css            # Global styles
-│   └── services/
-│       └── azureOpenAI.js   # Azure OpenAI API integration
-├── .env                     # Your credentials (DO NOT COMMIT)
-├── .env.example             # Template for credentials
-├── package.json             # Dependencies
-├── vite.config.js           # Vite configuration
-└── index.html               # HTML template
+│   ├── components/
+│   │   ├── ChatInput.tsx      # Message input with file upload
+│   │   └── ChatMessage.tsx    # Message display with markdown
+│   ├── services/
+│   │   └── azureOpenAI.ts     # Azure OpenAI API integration
+│   ├── utils/
+│   │   ├── markdown.ts        # Advanced markdown parser
+│   │   └── pdfExtractor.ts    # PDF text extraction
+│   ├── App.tsx                # Main application component
+│   ├── main.tsx               # Application entry point
+│   └── index.css              # Global styles
+├── public/                    # Static assets
+├── .env                       # Environment variables (create this)
+├── package.json              # Dependencies and scripts
+├── tsconfig.json             # TypeScript configuration
+├── vite.config.ts            # Vite configuration
+└── tailwind.config.js        # TailwindCSS configuration
 ```
 
+## 🎯 Key Features Explained
+
+### Markdown Rendering
+The chatbot supports comprehensive markdown syntax including:
+- **Headings** (H1-H6) with gradient styling
+- **Lists** (ordered and unordered)
+- **Tables** with zebra striping and hover effects
+- **Code blocks** with syntax highlighting and copy buttons
+- **Inline code** with custom styling
+- **Blockquotes** with left border accent
+- **Links** with hover effects
+- **Bold, italic, and strikethrough** text
+
+### Mathematical Equations
+Write equations using LaTeX syntax:
+- **Inline math**: `$E = mc^2$`
+- **Display math**: 
+  ```
+  $$
+  \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+  $$
+  ```
+
+### File Attachments
+Supported file types:
+- PDF (`.pdf`) - Full text extraction
+- Text files (`.txt`)
+- Word documents (`.doc`, `.docx`)
+- Maximum file size: Configurable
+
+### Code Copying
+All code blocks feature:
+- Hover-to-reveal copy button
+- One-click copying to clipboard
+- Visual feedback (checkmark animation)
+- Language detection and display
+
+## 🔧 Configuration
+
+### Azure OpenAI Setup
+1. Create an Azure OpenAI resource in Azure Portal
+2. Deploy a model (e.g., GPT-4, GPT-3.5-turbo)
+3. Copy the API key, endpoint, and deployment name
+4. Add them to your `.env` file
+
+### Customization
+
+#### Colors and Theme
+Edit `tailwind.config.js` to customize the color scheme:
+```javascript
+theme: {
+  extend: {
+    colors: {
+      // Add your custom colors
+    }
+  }
+}
+```
+
+#### Markdown Styles
+Modify `src/index.css` to customize markdown rendering styles.
+
+## 📝 Usage Examples
+
+### Basic Chat
+Simply type your message and press Enter or click Send to interact with the AI.
+
+### Sending Files
+1. Click the attachment icon
+2. Select a file (PDF, TXT, DOC, DOCX)
+3. The file content will be automatically extracted and sent to the AI
+4. The AI will analyze the content and respond accordingly
+
+### Mathematical Equations
+Ask the AI to explain math concepts:
+```
+"Explain the quadratic formula with an example"
+```
+
+The AI will respond with properly formatted equations.
+
+### Tables
+Request data in table format:
+```
+"Show me a comparison table of programming languages"
+```
+
+The AI will generate a beautifully formatted table.
+
+## 🚀 Deployment
+
+### Build for Production
+```bash
+npm run build
+```
+
+The build artifacts will be in the `dist/` directory.
+
+### Deploy to Vercel
+```bash
+npm install -g vercel
+vercel
+```
+
+### Deploy to Netlify
+```bash
+npm install -g netlify-cli
+netlify deploy --prod
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgments
+
+- **Azure OpenAI** for providing the AI capabilities
+- **React Team** for the amazing framework
+- **Vite Team** for the blazing-fast build tool
+- **TailwindCSS** for the utility-first CSS framework
+- **KaTeX** for beautiful math rendering
+- **marked** and **DOMPurify** for secure markdown parsing
+
+## 📧 Contact
+
+For questions or support, please open an issue on GitHub.
+
 ---
 
-## 🔒 Security Best Practices
-
-1. **Never commit `.env`** - It's already in `.gitignore`
-2. **Use environment variables** - Never hardcode credentials in your code
-3. **Rotate keys regularly** - In Azure Portal, regenerate keys periodically
-4. **Use Key Vault** - For production, consider Azure Key Vault
-5. **Restrict API access** - Configure network security in Azure Portal
-
----
-
-## 🛠️ Troubleshooting
-
-### "Azure OpenAI credentials are not configured"
-- Make sure you created `.env` file (not just `.env.example`)
-- Verify all environment variables start with `VITE_`
-- Restart the dev server after changing `.env`
-
-### "401 Unauthorized" or "403 Forbidden"
-- Check your API key is correct
-- Verify your key hasn't expired
-- Ensure your Azure subscription is active
-
-### "404 Not Found" or "Deployment not found"
-- Verify your deployment name is exactly correct (case-sensitive)
-- Check the deployment exists in Azure OpenAI Studio
-- Confirm the API version is correct
-
-### "Network error"
-- Check your internet connection
-- Verify the endpoint URL is correct
-- Ensure no firewall is blocking the connection
-
----
-
-## 📚 Additional Resources
-
-- [Azure OpenAI Service Documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/)
-- [Azure OpenAI REST API Reference](https://learn.microsoft.com/en-us/azure/ai-services/openai/reference)
-- [Create an Azure OpenAI Resource](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource)
-
----
-
-## 🎨 Features
-
-- ✅ Simple and clean UI
-- ✅ Real-time chat with Azure OpenAI
-- ✅ **File upload support** (drag & drop or click to upload)
-- ✅ Multiple file attachments
-- ✅ **Image upload with preview** (JPG, PNG, GIF, WebP, etc.)
-- ✅ Supports all file types (text, code, documents, images, PDFs, etc.)
-- ✅ Visual image thumbnails in upload preview
-- ✅ Message history
-- ✅ Loading states
-- ✅ Error handling
-- ✅ Responsive design
-
----
-
-## 📝 License
-
-MIT
+Built with ❤️ using React, TypeScript, and Azure OpenAI

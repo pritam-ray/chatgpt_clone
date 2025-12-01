@@ -322,6 +322,28 @@ function App() {
         onClose={() => setIsSidebarOpen(false)}
       />
 
+      {/* Icon bar visible when sidebar is closed on desktop */}
+      <div className={`hidden md:flex flex-col items-center gap-2 bg-[var(--bg-panel)] border-r border-[var(--border-strong)] py-2 transition-all duration-300 ${isSidebarOpen ? 'w-0 opacity-0 overflow-hidden' : 'w-14 opacity-100'}`}>
+        <button
+          type="button"
+          onClick={handleNewConversation}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)]"
+          title="New chat"
+          aria-label="New chat"
+        >
+          <Plus className="h-5 w-5" aria-hidden />
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsSidebarOpen(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)]"
+          title="Open sidebar"
+          aria-label="Open sidebar"
+        >
+          <MessageSquare className="h-5 w-5" aria-hidden />
+        </button>
+      </div>
+
       <div className="flex flex-1 flex-col">
         <header className="border-b border-[var(--border-strong)] bg-[var(--bg-panel)]/95 backdrop-blur-md transition-colors">
           <div className="flex w-full items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 sm:py-4">

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Moon, Sun, Menu, Bot } from 'lucide-react';
+import { MessageSquare, Moon, Sun, Menu, Bot, Plus } from 'lucide-react';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { Sidebar } from './components/Sidebar';

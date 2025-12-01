@@ -329,6 +329,15 @@ function App() {
       <div className={`hidden md:flex flex-col items-center gap-2 bg-[var(--bg-panel)] border-r border-[var(--border-strong)] py-2 transition-all duration-300 ${isSidebarOpen ? 'w-0 opacity-0 overflow-hidden' : 'w-14 opacity-100'}`}>
         <button
           type="button"
+          onClick={() => setIsSidebarOpen(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)]"
+          title="Open sidebar"
+          aria-label="Open chat history"
+        >
+          <Menu className="h-5 w-5" aria-hidden />
+        </button>
+        <button
+          type="button"
           onClick={handleNewConversation}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)]"
           title="New chat"
@@ -357,7 +366,7 @@ function App() {
           <div className="flex w-full items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 sm:py-4">
             <button
               type="button"
-              className={`inline-flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg sm:rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)] ${isSidebarOpen ? 'md:hidden' : 'md:inline-flex'}`}
+              className="inline-flex md:hidden h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg sm:rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)]"
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open chat history"
             >

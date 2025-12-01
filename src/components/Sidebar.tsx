@@ -1,4 +1,5 @@
-import { Plus, MessageSquare, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, MessageSquare, X, MoreHorizontal } from 'lucide-react';
 import type { Conversation } from '../types/chat';
 
 interface SidebarProps {
@@ -7,6 +8,8 @@ interface SidebarProps {
   isOpen: boolean;
   onSelectConversation: (conversationId: string) => void;
   onNewConversation: () => void;
+  onRenameConversation: (conversationId: string) => void;
+  onDeleteConversation: (conversationId: string) => void;
   onClose: () => void;
 }
 
@@ -32,8 +35,32 @@ export function Sidebar({
   isOpen,
   onSelectConversation,
   onNewConversation,
+  onRenameConversation,
+  onDeleteConversation,
   onClose,
 }: SidebarProps) {
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest('.conversation-actions')) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setOpenMenuId(null);
+    }
+  }, [isOpen]);
+
   return (
     <aside
       className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'} bg-[var(--bg-panel)] text-[var(--text-primary)]`}
@@ -67,7 +94,7 @@ export function Sidebar({
               const isActive = conversation.id === activeConversationId;
 
               return (
-                <li key={conversation.id}>
+                <li key={conversation.id} className="conversation-row">
                   <button
                     type="button"
                     onClick={() => onSelectConversation(conversation.id)}
@@ -79,6 +106,45 @@ export function Sidebar({
                       <span className="conversation-time">{formatRelativeTime(conversation.updatedAt)}</span>
                     </div>
                   </button>
+                  <div className="conversation-actions">
+                    <button
+                      type="button"
+                      className="conversation-action-button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setOpenMenuId((prev) => (prev === conversation.id ? null : conversation.id));
+                      }}
+                      aria-label="Conversation actions"
+                    >
+                      <MoreHorizontal className="h-4 w-4" aria-hidden />
+                    </button>
+                    {openMenuId === conversation.id ? (
+                      <div className="conversation-menu">
+                        <button
+                          type="button"
+                          className="conversation-menu-item"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setOpenMenuId(null);
+                            onRenameConversation(conversation.id);
+                          }}
+                        >
+                          Rename
+                        </button>
+                        <button
+                          type="button"
+                          className="conversation-menu-item is-destructive"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setOpenMenuId(null);
+                            onDeleteConversation(conversation.id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
                 </li>
               );
             })}

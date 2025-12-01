@@ -144,6 +144,54 @@ function App() {
     });
   };
 
+  const handleRenameConversation = (conversationId: string) => {
+    const target = conversations.find((conversation) => conversation.id === conversationId);
+    if (!target) {
+      return;
+    }
+
+    const initialTitle = target.title === DEFAULT_TITLE ? '' : target.title;
+    const nextTitle = window.prompt('Rename conversation', initialTitle) ?? undefined;
+    if (nextTitle === undefined) {
+      return;
+    }
+
+    const trimmed = nextTitle.trim() || DEFAULT_TITLE;
+    updateConversationById(conversationId, (conversation) => ({
+      ...conversation,
+      title: trimmed,
+      updatedAt: Date.now(),
+    }));
+  };
+
+  const handleDeleteConversation = (conversationId: string) => {
+    const confirmDelete = window.confirm('Delete this conversation?');
+    if (!confirmDelete) {
+      return;
+    }
+
+    setConversationState((prev) => {
+      const remaining = prev.conversations.filter((conversation) => conversation.id !== conversationId);
+      if (remaining.length === 0) {
+        const conversation = createConversation();
+        return {
+          conversations: [conversation],
+          activeConversationId: conversation.id,
+        };
+      }
+
+      const nextActiveId = prev.activeConversationId === conversationId ? remaining[0].id : prev.activeConversationId;
+      return {
+        conversations: remaining,
+        activeConversationId: nextActiveId,
+      };
+    });
+
+    if (activeConversationId === conversationId) {
+      setIsLoading(false);
+    }
+  };
+
   const handleSelectConversation = (conversationId: string) => {
     setConversationState((prev) => {
       if (!prev.conversations.some((conversation) => conversation.id === conversationId)) {
@@ -269,6 +317,8 @@ function App() {
         isOpen={isSidebarOpen}
         onSelectConversation={handleSelectConversation}
         onNewConversation={handleNewConversation}
+        onRenameConversation={handleRenameConversation}
+        onDeleteConversation={handleDeleteConversation}
         onClose={() => setIsSidebarOpen(false)}
       />
 

@@ -674,11 +674,18 @@ body {
   gap: 0.5rem;
 }
 
+.conversation-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .conversation-item {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex: 1;
   border: 1px solid transparent;
   border-radius: 0.9rem;
   padding: 0.65rem 0.85rem;
@@ -719,6 +726,67 @@ body {
 .conversation-time {
   font-size: 0.75rem;
   color: var(--text-tertiary);
+}
+
+.conversation-actions {
+  position: relative;
+}
+
+.conversation-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+  color: var(--text-tertiary);
+  background: transparent;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.conversation-action-button:hover,
+.conversation-action-button:focus-visible {
+  background-color: var(--bg-control-hover);
+  color: var(--text-primary);
+}
+
+.conversation-menu {
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 9rem;
+  padding: 0.35rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-panel);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+  z-index: 5;
+}
+
+.conversation-menu-item {
+  text-align: left;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.conversation-menu-item:hover,
+.conversation-menu-item:focus-visible {
+  background-color: var(--bg-control-hover);
+  color: var(--text-primary);
+}
+
+.conversation-menu-item.is-destructive {
+  color: #ef4444;
+}
+
+.conversation-menu-item.is-destructive:hover {
+  color: #f87171;
 }
 
 @media (min-width: 768px) {

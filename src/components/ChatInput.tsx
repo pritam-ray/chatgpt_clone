@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
 import { Send, Paperclip, X } from 'lucide-react';
-import { extractTextFromFile } from '../utils/pdfExtractor';
 import { Attachment } from '../services/azureOpenAI';
 
 interface ChatInputProps {
@@ -11,9 +10,8 @@ interface ChatInputProps {
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [input, setInput] = useState('');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
-  const [fileContent, setFileContent] = useState<string>('');
-  const [imageAttachment, setImageAttachment] = useState<Attachment | null>(null);
-  const [isExtractingFile, setIsExtractingFile] = useState(false);
+  const [attachment, setAttachment] = useState<Attachment | null>(null);
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const resetFileInput = () => {
@@ -42,118 +40,89 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
 
     setAttachedFile(file);
-    setIsExtractingFile(true);
-
-    if (file.type.startsWith('image/')) {
-      try {
-        const dataUrl = await readFileAsDataUrl(file);
-        setImageAttachment({
-          type: 'image',
-          mimeType: file.type,
-          dataUrl,
-          fileName: file.name,
-        });
-        setFileContent('');
-      } catch (error) {
-        console.error('Error reading image:', error);
-        alert('Could not read the selected image. Please try another file.');
-        setAttachedFile(null);
-        setImageAttachment(null);
-      } finally {
-        setIsExtractingFile(false);
-        resetFileInput();
-      }
-      return;
-    }
+    setIsProcessingFile(true);
 
     try {
-      const content = await extractTextFromFile(file);
-      setImageAttachment(null);
-      setFileContent(content);
-      if (!content || content.trim().length === 0) {
-        alert('Could not extract text from the file. The file might be empty or unsupported.');
-        setAttachedFile(null);
-        setFileContent('');
-      }
+      const dataUrl = await readFileAsDataUrl(file);
+      const attachmentType = file.type.startsWith('image/') ? 'image' : 'document';
+      
+      setAttachment({
+        type: attachmentType,
+        mimeType: file.type,
+        dataUrl,
+        fileName: file.name,
+      });
     } catch (error) {
-      console.error('Error extracting file content:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Error reading file: ${errorMessage}\nPlease try another file.`);
+      console.error('Error reading file:', error);
+      alert('Could not read the selected file. Please try another file.');
       setAttachedFile(null);
-      setFileContent('');
+      setAttachment(null);
     } finally {
-      setIsExtractingFile(false);
+      setIsProcessingFile(false);
       resetFileInput();
     }
   };
 
   const handleRemoveFile = () => {
     setAttachedFile(null);
-    setFileContent('');
-    setImageAttachment(null);
+    setAttachment(null);
     resetFileInput();
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedInput = input.trim();
-    if (!(trimmedInput || fileContent || imageAttachment) || disabled || isExtractingFile) {
+    if (!(trimmedInput || attachment) || disabled || isProcessingFile) {
       return;
     }
 
-    let fullContent = trimmedInput;
     let displayContent = trimmedInput;
     const attachments: Attachment[] = [];
 
-    if (fileContent) {
-      fullContent += `\n\n[Attached File: ${attachedFile?.name}]\n\n${fileContent}`;
-      displayContent = trimmedInput
-        ? `${trimmedInput}\n\n📎 Attached: ${attachedFile?.name}`
-        : `📎 Attached: ${attachedFile?.name}`;
-    }
-
-    if (imageAttachment) {
-      attachments.push(imageAttachment);
+    if (attachment) {
+      attachments.push(attachment);
+      const icon = attachment.type === 'image' ? '🖼️' : '📎';
+      const label = attachment.type === 'image' ? 'Image' : 'Document';
       displayContent = displayContent
-        ? `${displayContent}\n\n🖼️ Image attached: ${imageAttachment.fileName}`
-        : `🖼️ Image attached: ${imageAttachment.fileName}`;
+        ? `${displayContent}\n\n${icon} ${label} attached: ${attachment.fileName}`
+        : `${icon} ${label} attached: ${attachment.fileName}`;
     }
 
-    onSend(fullContent, displayContent, attachedFile?.name, attachments.length ? attachments : undefined);
+    onSend(trimmedInput, displayContent, attachedFile?.name, attachments.length ? attachments : undefined);
     setInput('');
     handleRemoveFile();
   };
 
-  const sendDisabled = disabled || isExtractingFile || (!input.trim() && !fileContent && !imageAttachment);
+  const sendDisabled = disabled || isProcessingFile || (!input.trim() && !attachment);
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-[#2a2b32] bg-[#343541] px-4 py-4">
+    <form onSubmit={handleSubmit} className="border-t border-[var(--border-strong)] bg-[var(--bg-panel)] px-4 py-4 transition-colors duration-300">
       <div className="mx-auto w-full max-w-3xl space-y-3">
         {attachedFile && (
-          <div className="flex items-center justify-between rounded-xl border border-[#565869] bg-[#40414f] px-4 py-3 text-[#ececf1]">
+          <div className="flex items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] px-4 py-3 text-[var(--text-primary)] transition-colors">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#565869]/60">
-                <Paperclip className="h-4 w-4" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--bg-control-hover)]/80 text-[var(--text-primary)]">
+                <Paperclip className="h-4 w-4" aria-hidden />
               </div>
               <div>
                 <span className="block text-sm font-medium">
-                  {isExtractingFile ? 'Processing...' : attachedFile.name}
+                  {isProcessingFile ? 'Processing...' : attachedFile.name}
                 </span>
-                {imageAttachment ? (
-                  <span className="text-xs text-[#9a9b9f]">Image attachment</span>
-                ) : fileContent ? (
-                  <span className="text-xs text-[#9a9b9f]">Document attachment</span>
-                ) : null}
+                {attachment && (
+                  <span className="text-xs text-[var(--text-tertiary)]">
+                    {attachment.type === 'image' ? 'Image' : 'Document'} attachment
+                  </span>
+                )}
               </div>
             </div>
             <button
               type="button"
               onClick={handleRemoveFile}
-              className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[#565869]/70"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-secondary)] transition hover:bg-[var(--bg-control-hover)]"
               title="Remove attachment"
               aria-label="Remove attachment"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
         )}
@@ -162,12 +131,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={disabled || isExtractingFile}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#565869] bg-[#40414f] text-[#ececf1] transition hover:bg-[#4a4b58] disabled:cursor-not-allowed disabled:border-[#3f414a] disabled:text-[#6b6e7f]"
+            disabled={disabled || isProcessingFile}
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             title="Attach file"
             aria-label="Attach file"
           >
-            <Paperclip className="h-5 w-5" />
+            <Paperclip className="h-5 w-5" aria-hidden />
           </button>
 
           <input
@@ -184,9 +153,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isExtractingFile ? 'Processing file...' : 'Message ChatGPT'}
-            disabled={disabled || isExtractingFile}
-            className="flex-1 rounded-2xl border border-[#565869] bg-[#40414f] px-5 py-3 text-[15px] text-white placeholder-[#8e8f9b] focus:border-[#10a37f] focus:outline-none"
+            placeholder={isProcessingFile ? 'Processing file...' : 'Message ChatGPT'}
+            disabled={disabled || isProcessingFile}
+            className="chat-input-field flex-1 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-input)] px-5 py-3 text-[15px] text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none focus:ring-0"
             aria-label="Message input"
             title="Message input"
           />
@@ -194,10 +163,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           <button
             type="submit"
             disabled={sendDisabled}
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#10a37f] text-[#0c1722] transition hover:bg-[#14b081] disabled:cursor-not-allowed disabled:bg-[#4a4b58] disabled:text-[#8b8c94]"
+            className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:bg-[var(--bg-control)] disabled:text-[var(--text-tertiary)]"
             aria-label="Send message"
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-5 w-5" aria-hidden />
           </button>
         </div>
       </div>

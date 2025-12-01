@@ -1,6 +1,50 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import katex from 'katex';
+import { markedEmoji } from 'marked-emoji';
+import markedFootnote from 'marked-footnote';
+
+// Configure marked extensions
+marked.use(markedEmoji({
+  emojis: {
+    // Common emojis - feel free to add more!
+    smile: '😄',
+    heart: '❤️',
+    thumbsup: '👍',
+    thumbsdown: '👎',
+    fire: '🔥',
+    rocket: '🚀',
+    star: '⭐',
+    check: '✅',
+    warning: '⚠️',
+    info: 'ℹ️',
+    tada: '🎉',
+    thinking: '🤔',
+    confused: '😕',
+    cry: '😢',
+    laugh: '😂',
+    cool: '😎',
+    wave: '👋',
+    clap: '👏',
+    brain: '🧠',
+    bulb: '💡',
+    book: '📚',
+    pencil: '✏️',
+    computer: '💻',
+    phone: '📱',
+    email: '📧',
+    calendar: '📅',
+    clock: '🕐',
+    globe: '🌍',
+    sun: '☀️',
+    moon: '🌙',
+    cloud: '☁️',
+    rain: '🌧️',
+    snow: '❄️',
+  },
+}));
+
+marked.use(markedFootnote());
 
 // Configure marked options
 marked.setOptions({

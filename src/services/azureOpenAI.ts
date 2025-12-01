@@ -1,7 +1,7 @@
 export type Attachment = {
-  type: 'image';
+  type: 'image' | 'document';
   mimeType: string;
-  dataUrl: string; // base64 or remote URL supported by Azure OpenAI
+  dataUrl: string; // base64 data URL for images and documents
   fileName: string;
 };
 
@@ -42,6 +42,13 @@ function buildAzureMessages(messages: Message[]) {
             image_url: {
               url: attachment.dataUrl,
               detail: 'auto',
+            },
+          });
+        } else if (attachment.type === 'document') {
+          parts.push({
+            type: 'image_url',
+            image_url: {
+              url: attachment.dataUrl,
             },
           });
         }

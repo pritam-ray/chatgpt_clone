@@ -2,63 +2,168 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-app: #343541;
+  --bg-panel: #343541;
+  --bg-panel-alt: #3c3d45;
+  --bg-message-user: #343541;
+  --bg-message-assistant: #444654;
+  --bg-input: #40414f;
+  --bg-control: #40414f;
+  --bg-control-hover: #4a4b58;
+  --bg-attachment: #202123;
+  --bg-code-block: #1e1f24;
+  --bg-inline-code: #202123;
+  --bg-blockquote: rgba(16, 163, 127, 0.1);
+  --bg-image: linear-gradient(135deg, #1e1f24 0%, #2a2b32 100%);
+  --border-strong: #2a2b32;
+  --border-subtle: #3f414a;
+  --border-code-block: #2a2b32;
+  --border-blockquote: #10a37f;
+  --border-attachment: #2a2b32;
+  --border-image: #2a2b32;
+  --text-primary: #ececf1;
+  --text-secondary: #c7c8d3;
+  --text-tertiary: #9a9b9f;
+  --text-code: #f5f5f5;
+  --accent: #10a37f;
+  --accent-contrast: #0c1722;
+  --accent-hover: #14b081;
+  --accent-muted-bg: rgba(16, 163, 127, 0.15);
+  --accent-muted-border: rgba(16, 163, 127, 0.3);
+  --shadow-color: rgba(0, 0, 0, 0.35);
+  --placeholder: #8e8f9b;
+  --scrollbar-track: #2a2b32;
+  --scrollbar-thumb: #565869;
+  --scrollbar-thumb-hover: #6b6e7f;
+  --bg-typing-dot: #10a37f;
+  --copy-button-bg: rgba(51, 65, 85, 0.85);
+  --copy-button-hover: rgba(71, 85, 105, 0.95);
+  --copy-button-icon: #d1d5db;
+  --copy-button-icon-success: #34d399;
+  --footnote-border: #2a2b32;
+  --footnote-text: #9a9b9f;
+  color-scheme: dark;
+}
+
+.theme-dark {
+  color-scheme: dark;
+}
+
+.theme-light {
+  --bg-app: #f7f7f8;
+  --bg-panel: #ffffff;
+  --bg-panel-alt: #f0f2f5;
+  --bg-message-user: #ffffff;
+  --bg-message-assistant: #f7f7f8;
+  --bg-input: #ffffff;
+  --bg-control: #ffffff;
+  --bg-control-hover: #f3f5f7;
+  --bg-attachment: #ffffff;
+  --bg-code-block: #f4f4f7;
+  --bg-inline-code: #f4f4f5;
+  --bg-blockquote: #eef6f3;
+  --bg-image: linear-gradient(135deg, #ffffff 0%, #f4f5f7 100%);
+  --border-strong: #e0e3ea;
+  --border-subtle: #e5e7ec;
+  --border-code-block: #e5e7eb;
+  --border-blockquote: #d0ebe2;
+  --border-attachment: #e5e7eb;
+  --border-image: #e5e7eb;
+  --text-primary: #1b1c1f;
+  --text-secondary: #4f566b;
+  --text-tertiary: #6b7280;
+  --text-code: #1f2933;
+  --accent: #10a37f;
+  --accent-contrast: #ffffff;
+  --accent-hover: #13b892;
+  --accent-muted-bg: rgba(16, 163, 127, 0.12);
+  --accent-muted-border: rgba(16, 163, 127, 0.25);
+  --shadow-color: rgba(15, 23, 42, 0.08);
+  --placeholder: #9ca3af;
+  --scrollbar-track: #e4e6eb;
+  --scrollbar-thumb: #c8cdd8;
+  --scrollbar-thumb-hover: #b5bcc9;
+  --bg-typing-dot: #10a37f;
+  --copy-button-bg: rgba(226, 232, 240, 0.9);
+  --copy-button-hover: rgba(210, 218, 230, 0.95);
+  --copy-button-icon: #374151;
+  --copy-button-icon-success: #059669;
+  --footnote-border: #e0e3ea;
+  --footnote-text: #6b7280;
+  color-scheme: light;
+}
+
+html,
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
 /* Markdown content styling */
 .markdown-content {
   @apply leading-relaxed;
-  color: #ececf1;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
 }
 
 /* Headings */
 .markdown-content h1 {
   @apply mt-6 mb-4 text-3xl font-semibold;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .markdown-content h2 {
   @apply mt-6 mb-3 text-2xl font-semibold;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .markdown-content h3 {
   @apply mt-5 mb-3 text-xl font-semibold;
-  color: #e0e1ec;
+  color: var(--text-secondary);
 }
 
 .markdown-content h4 {
   @apply mt-4 mb-2 text-lg font-semibold;
-  color: #d1d3df;
+  color: var(--text-secondary);
 }
 
 .markdown-content h5,
 .markdown-content h6 {
   @apply mt-4 mb-2 text-base font-semibold;
-  color: #c7c8d3;
+  color: var(--text-secondary);
 }
 
 /* Paragraphs */
 .markdown-content p {
   @apply mb-3;
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 /* Lists */
 .markdown-content ul {
   @apply mb-3 list-disc space-y-1 pl-6;
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 .markdown-content ol {
   @apply mb-3 list-decimal space-y-1 pl-6;
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 .markdown-content li {
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 /* Links */
 .markdown-content a {
-  color: #10a37f;
+  color: var(--accent);
   text-decoration: none;
 }
 
@@ -69,18 +174,19 @@
 /* Inline code */
 .markdown-content code:not(pre code) {
   @apply rounded px-2 py-0.5 text-sm font-mono;
-  background-color: #202123;
-  color: #f5f5f5;
-  border: 1px solid #3f414a;
+  background-color: var(--bg-inline-code);
+  color: var(--text-code);
+  border: 1px solid var(--border-subtle);
 }
 
 /* Code blocks */
 .markdown-content pre.code-block {
   @apply my-4 overflow-x-auto rounded-2xl border text-sm font-mono;
-  background-color: #1e1f24;
-  color: #f3f4f6;
-  border-color: #2a2b32;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  background-color: var(--bg-code-block);
+  color: var(--text-code);
+  border-color: var(--border-code-block);
+  box-shadow: 0 12px 30px var(--shadow-color);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .markdown-content pre.code-block code {
@@ -90,22 +196,23 @@
 /* Blockquotes */
 .markdown-content blockquote {
   @apply my-4 rounded-2xl border-l-4 px-6 py-4 italic;
-  border-color: #10a37f;
-  background: rgba(16, 163, 127, 0.1);
-  color: #c7c8d3;
+  border-color: var(--border-blockquote);
+  background: var(--bg-blockquote);
+  color: var(--text-secondary);
 }
 
 /* Horizontal rules */
 .markdown-content hr {
   @apply my-6;
-  border-color: #2a2b32;
+  border-color: var(--border-strong);
 }
 
 /* Tables */
 .markdown-content .table-wrapper {
   @apply my-4 overflow-x-auto rounded-2xl;
-  border: 1px solid #2a2b32;
-  background: #202123;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-panel-alt);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .markdown-content .markdown-table {
@@ -113,40 +220,40 @@
 }
 
 .markdown-content .markdown-table thead {
-  background: #2a2b32;
+  background: var(--bg-panel);
 }
 
 .markdown-content .markdown-table th {
   @apply px-4 py-3 text-left font-semibold;
-  color: #ffffff;
-  border-bottom: 1px solid #3f414a;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .markdown-content .markdown-table td {
   @apply px-4 py-3;
-  color: #d1d3df;
-  border-bottom: 1px solid #2a2b32;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-strong);
 }
 
 .markdown-content .markdown-table tbody tr:nth-child(even) {
-  background: #1e1f24;
+  background: var(--bg-panel-alt);
 }
 
 .markdown-content .markdown-table tbody tr:hover {
-  background: #2a2b32;
+  background: var(--bg-panel);
 }
 
 /* Math equation styling */
 .math-inline {
   @apply inline-block align-middle mx-0.5;
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 .math-display {
   @apply block my-6 overflow-x-auto rounded-2xl py-5 px-4 text-center;
-  background: rgba(32, 33, 36, 0.7);
-  border: 1px solid #2a2b32;
-  color: #ececf1;
+  background: var(--bg-panel-alt);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
 }
 
 .math-error {
@@ -163,7 +270,7 @@
 /* Enhanced KaTeX styling */
 .katex {
   font-size: 1.15em;
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 .math-display .katex {
@@ -173,7 +280,7 @@
 /* Better spacing for math in lists */
 .markdown-content li .math-inline {
   @apply mx-1;
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 .markdown-content li .math-display {
@@ -183,17 +290,17 @@
 /* Strong and emphasis */
 .markdown-content strong {
   @apply font-bold;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .markdown-content em {
   @apply italic;
-  color: #ececf1;
+  color: var(--text-primary);
 }
 
 .markdown-content del {
   @apply line-through;
-  color: #8e8f9b;
+  color: var(--text-tertiary);
 }
 
 /* Image styling */
@@ -205,9 +312,9 @@
   @apply max-w-full h-auto rounded-xl border transition-shadow duration-300;
   max-height: 600px;
   object-fit: contain;
-  background: linear-gradient(135deg, #1e1f24 0%, #2a2b32 100%);
-  border-color: #2a2b32;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  background: var(--bg-image);
+  border-color: var(--border-image);
+  box-shadow: 0 12px 30px var(--shadow-color);
 }
 
 .markdown-image.image-error {
@@ -217,13 +324,13 @@
 
 .markdown-image-caption {
   @apply mt-3 text-sm italic text-center;
-  color: #9a9b9f;
+  color: var(--text-tertiary);
 }
 
 /* Typing indicator */
 .typing-dot {
   @apply h-2 w-2 rounded-full animate-bounce;
-  background-color: #10a37f;
+  background-color: var(--bg-typing-dot);
 }
 
 .typing-dot.dot-2 {
@@ -234,6 +341,121 @@
   animation-delay: 300ms;
 }
 
+/* Footnote styling */
+.markdown-content .footnotes {
+  @apply mt-8 pt-4 border-t text-sm;
+  border-color: var(--footnote-border);
+  color: var(--footnote-text);
+}
+
+.markdown-content .footnotes-title {
+  @apply text-base font-semibold mb-3;
+  color: var(--text-primary);
+}
+
+.markdown-content .footnotes ol {
+  @apply space-y-2;
+}
+
+.markdown-content .footnotes li {
+  @apply pl-2;
+  color: var(--text-secondary);
+}
+
+.markdown-content .footnotes li p {
+  @apply inline;
+  color: var(--text-secondary);
+}
+
+.markdown-content .footnote-ref {
+  @apply text-xs align-super font-medium no-underline rounded px-1;
+  color: var(--accent);
+  background: var(--accent-muted-bg);
+  border: 1px solid var(--accent-muted-border);
+}
+
+.markdown-content .footnote-ref:hover {
+  background: var(--accent-muted-bg);
+  text-decoration: none;
+}
+
+.markdown-content .footnote-backref {
+  @apply ml-2 no-underline;
+  color: var(--accent);
+}
+
+.markdown-content .footnote-backref:hover {
+  text-decoration: underline;
+}
+
+/* Emoji styling */
+.markdown-content .emoji {
+  @apply inline-block align-middle mx-0.5;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.accent-badge {
+  background-color: var(--accent-muted-bg);
+  color: var(--accent);
+}
+
+.chat-bubble {
+  box-shadow: 0 12px 30px var(--shadow-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.code-block-wrapper {
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  padding: 0.55rem;
+  background: var(--copy-button-bg);
+  color: var(--copy-button-icon);
+  border: 1px solid transparent;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: background-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.code-block-wrapper:hover .copy-button,
+.copy-button:focus-visible {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  background: var(--copy-button-hover);
+  transform: scale(1.05);
+}
+
+.copy-button:active {
+  transform: scale(0.97);
+}
+
+.copy-button-icon {
+  width: 1rem;
+  height: 1rem;
+  color: currentColor;
+}
+
+.copy-button.is-copied {
+  color: var(--copy-button-icon-success);
+}
+
+.chat-input-field::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
@@ -241,15 +463,15 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #2a2b32;
+  background: var(--scrollbar-track);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #565869;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b6e7f;
+  background: var(--scrollbar-thumb-hover);
 }

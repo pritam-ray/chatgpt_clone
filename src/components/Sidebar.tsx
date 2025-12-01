@@ -92,6 +92,8 @@ export function Sidebar({
           <ul className="conversation-list">
             {conversations.map((conversation) => {
               const isActive = conversation.id === activeConversationId;
+              const fullTitle = conversation.title || 'New chat';
+              const truncatedTitle = fullTitle.length > 32 ? `${fullTitle.slice(0, 32).trim()}…` : fullTitle;
 
               return (
                 <li key={conversation.id} className="conversation-row">
@@ -99,10 +101,11 @@ export function Sidebar({
                     type="button"
                     onClick={() => onSelectConversation(conversation.id)}
                     className={`conversation-item ${isActive ? 'is-active' : ''}`}
+                    title={fullTitle}
                   >
                     <MessageSquare className="h-4 w-4 flex-none" aria-hidden />
                     <div className="conversation-meta">
-                      <span className="conversation-title">{conversation.title || 'New chat'}</span>
+                      <span className="conversation-title">{truncatedTitle}</span>
                       <span className="conversation-time">{formatRelativeTime(conversation.updatedAt)}</span>
                     </div>
                   </button>

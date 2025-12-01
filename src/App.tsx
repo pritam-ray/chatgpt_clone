@@ -199,8 +199,16 @@ function App() {
         return prev;
       }
 
+      // Remove the current active conversation if it's empty
+      const currentActive = prev.conversations.find((c) => c.id === prev.activeConversationId);
+      let updatedConversations = prev.conversations;
+      
+      if (currentActive && currentActive.messages.length === 0 && prev.activeConversationId !== conversationId) {
+        updatedConversations = prev.conversations.filter((c) => c.id !== currentActive.id);
+      }
+
       return {
-        ...prev,
+        conversations: updatedConversations,
         activeConversationId: conversationId,
       };
     });
@@ -208,6 +216,14 @@ function App() {
   };
 
   const handleNewConversation = () => {
+    // Check if the current active conversation is already empty
+    const currentActive = conversations.find((c) => c.id === activeConversationId);
+    if (currentActive && currentActive.messages.length === 0) {
+      // Don't create a new chat if the current one is already empty
+      setIsSidebarOpen(false);
+      return;
+    }
+
     const conversation = createConversation();
     setConversationState((prev) => ({
       conversations: [conversation, ...prev.conversations],
@@ -402,13 +418,14 @@ function App() {
         <main className="flex-1 overflow-y-auto bg-[var(--bg-app)] transition-colors">
           <div className="mx-auto w-full max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
             {messages.length === 0 ? (
-              <div className="flex h-full min-h-[60vh] flex-col items-center justify-center gap-6 text-center text-[var(--text-tertiary)]">
-                <MessageSquare className="h-16 w-16 text-[var(--border-subtle)]" />
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-semibold text-[var(--text-primary)]">How can I help you today?</h2>
-                  <p className="text-base text-[var(--text-tertiary)]">
-                    Ask about anything—from quick questions to detailed explanations.
-                  </p>
+              <div className="flex h-full min-h-[60vh] flex-col items-center justify-center gap-8 text-center">
+                <div className="relative">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--bg-panel)] border-2 border-[var(--border-subtle)]">
+                    <MessageSquare className="h-8 w-8 text-[var(--text-tertiary)]" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h2 className="text-2xl sm:text-3xl font-normal text-[var(--text-primary)]">How can I help you today?</h2>
                 </div>
               </div>
             ) : (

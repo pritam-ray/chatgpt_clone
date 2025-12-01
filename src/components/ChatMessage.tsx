@@ -119,6 +119,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const cardClass = `chat-card ${
     isUser ? 'chat-card-user' : isAssistant ? 'chat-card-assistant' : 'chat-card-system'
   }`;
+  const shouldShowHeader = !isUser;
 
   return (
     <article className={rowClass}>
@@ -126,9 +127,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {isUser ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
       </div>
       <div className={cardClass}>
-        <header className="chat-card-header">
-          <span className="chat-card-label">{label}</span>
-        </header>
+        {shouldShowHeader ? (
+          <header className="chat-card-header">
+            <span className="chat-card-label">{label}</span>
+          </header>
+        ) : null}
         <div className="chat-card-body">
           {isAssistant ? (
             <MarkdownContent content={displayContent} />

@@ -6,7 +6,7 @@
   --bg-app: #343541;
   --bg-panel: #343541;
   --bg-panel-alt: #3c3d45;
-  --bg-message-user: #343541;
+  --bg-message-user: #3d3e4a;
   --bg-message-assistant: #444654;
   --bg-input: #40414f;
   --bg-control: #40414f;
@@ -43,6 +43,7 @@
   --copy-button-icon-success: #34d399;
   --footnote-border: #2a2b32;
   --footnote-text: #9a9b9f;
+  --border-user-card: rgba(0, 0, 0, 0.08);
   color-scheme: dark;
 }
 
@@ -54,7 +55,7 @@
   --bg-app: #f7f7f8;
   --bg-panel: #ffffff;
   --bg-panel-alt: #f0f2f5;
-  --bg-message-user: #ffffff;
+  --bg-message-user: #f2f2f7;
   --bg-message-assistant: #f7f7f8;
   --bg-input: #ffffff;
   --bg-control: #ffffff;
@@ -91,6 +92,7 @@
   --copy-button-icon-success: #059669;
   --footnote-border: #e0e3ea;
   --footnote-text: #6b7280;
+  --border-user-card: rgba(15, 23, 42, 0.08);
   color-scheme: light;
 }
 
@@ -452,6 +454,8 @@ body {
 
 .chat-card-user {
   background-color: var(--bg-message-user);
+  border-color: transparent;
+  box-shadow: 0 18px 35px var(--border-user-card);
   margin-left: auto;
   width: fit-content;
   max-width: min(80%, 520px);

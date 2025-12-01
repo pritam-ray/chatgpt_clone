@@ -324,27 +324,27 @@ function App() {
 
       <div className="flex flex-1 flex-col">
         <header className="border-b border-[var(--border-strong)] bg-[var(--bg-panel)]/95 backdrop-blur-md transition-colors">
-          <div className="flex w-full items-center gap-3 px-4 py-4">
+          <div className="flex w-full items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 sm:py-4">
             <button
               type="button"
-              className={`inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)] ${isSidebarOpen ? 'md:hidden' : 'md:inline-flex'}`}
+              className={`inline-flex h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-lg sm:rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)] ${isSidebarOpen ? 'md:hidden' : 'md:inline-flex'}`}
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open chat history"
             >
-              <Menu className="h-5 w-5" aria-hidden />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
             </button>
-            <div className="accent-badge hidden h-11 w-11 flex-shrink-0 items-center justify-center rounded-full md:flex">
+            <div className="accent-badge hidden h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-full md:flex">
               <MessageSquare className="h-5 w-5 text-[var(--accent)]" />
             </div>
-            <div className="flex-1">
-              <h1 className="text-base font-semibold text-[var(--text-primary)]">ChatGPT Clone</h1>
-              <p className="text-sm text-[var(--text-tertiary)]">Powered by Azure OpenAI</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate">ChatGPT Clone</h1>
+              <p className="text-xs sm:text-sm text-[var(--text-tertiary)] truncate">Powered by Azure OpenAI</p>
             </div>
             <div className="flex-shrink-0">
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="flex items-center gap-2 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-control-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                className="flex items-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-control-hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                 aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               >
                 {theme === 'dark' ? (
@@ -361,7 +361,7 @@ function App() {
         </header>
 
         <main className="flex-1 overflow-y-auto bg-[var(--bg-app)] transition-colors">
-          <div className="mx-auto w-full max-w-4xl px-4 py-8">
+          <div className="mx-auto w-full max-w-4xl px-3 py-4 sm:px-4 sm:py-8">
             {messages.length === 0 ? (
               <div className="flex h-full min-h-[60vh] flex-col items-center justify-center gap-6 text-center text-[var(--text-tertiary)]">
                 <MessageSquare className="h-16 w-16 text-[var(--border-subtle)]" />

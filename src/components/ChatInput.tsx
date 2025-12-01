@@ -96,8 +96,8 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const sendDisabled = disabled || isProcessingFile || (!input.trim() && !attachment);
 
   return (
-    <form onSubmit={handleSubmit} className="border-t border-[var(--border-strong)] bg-[var(--bg-panel)] px-4 py-4 transition-colors duration-300">
-      <div className="mx-auto w-full max-w-3xl space-y-3">
+    <form onSubmit={handleSubmit} className="border-t border-[var(--border-strong)] bg-[var(--bg-panel)] px-3 py-3 sm:px-4 sm:py-4 transition-colors duration-300">
+      <div className="mx-auto w-full max-w-4xl space-y-2 sm:space-y-3">
         {attachedFile && (
           <div className="flex items-center justify-between rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] px-4 py-3 text-[var(--text-primary)] transition-colors">
             <div className="flex items-center gap-3">
@@ -127,16 +127,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           </div>
         )}
 
-        <div className="flex items-end gap-3">
+        <div className="flex items-end gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || isProcessingFile}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)] disabled:cursor-not-allowed disabled:opacity-60"
             title="Attach file"
             aria-label="Attach file"
           >
-            <Paperclip className="h-5 w-5" aria-hidden />
+            <Paperclip className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
           </button>
 
           <input
@@ -155,7 +155,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             onChange={(e) => setInput(e.target.value)}
             placeholder={isProcessingFile ? 'Processing file...' : 'Message ChatGPT'}
             disabled={disabled || isProcessingFile}
-            className="chat-input-field flex-1 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-input)] px-5 py-3 text-[15px] text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none focus:ring-0"
+            className="chat-input-field flex-1 rounded-xl sm:rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-input)] px-3 py-2.5 sm:px-5 sm:py-3 text-sm sm:text-[15px] text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none focus:ring-0"
             aria-label="Message input"
             title="Message input"
           />
@@ -163,10 +163,10 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           <button
             type="submit"
             disabled={sendDisabled}
-            className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:bg-[var(--bg-control)] disabled:text-[var(--text-tertiary)]"
+            className="flex h-10 w-10 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:bg-[var(--bg-control)] disabled:text-[var(--text-tertiary)]"
             aria-label="Send message"
           >
-            <Send className="h-5 w-5" aria-hidden />
+            <Send className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
           </button>
         </div>
       </div>

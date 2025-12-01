@@ -164,7 +164,7 @@ export function Sidebar({
                       }}
                       aria-label="Conversation actions"
                     >
-                      <MoreHorizontal className="h-4 w-4" aria-hidden />
+                      <MoreHorizontal className="h-4 w-4 z-100" aria-hidden />
                     </button>
                     {openMenuId === conversation.id ? (
                       <div className="conversation-menu">

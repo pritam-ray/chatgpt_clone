@@ -3,6 +3,7 @@ import { MessageSquare, Moon, Sun, Menu, Bot, Plus, Search } from 'lucide-react'
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { Sidebar } from './components/Sidebar';
+import { SearchModal } from './components/SearchModal';
 import { Attachment, Message, streamChatCompletion } from './services/azureOpenAI';
 import type { Conversation } from './types/chat';
 
@@ -91,6 +92,7 @@ function App() {
     return window.innerWidth >= 768;
   });
   const [shouldFocusSearch, setShouldFocusSearch] = useState(false);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { conversations, activeConversationId } = conversationState;
@@ -339,6 +341,7 @@ function App() {
         onClose={() => setIsSidebarOpen(false)}
         shouldFocusSearch={shouldFocusSearch}
         onSearchFocused={() => setShouldFocusSearch(false)}
+        onOpenSearch={() => setIsSearchModalOpen(true)}
       />
 
       {/* Icon bar visible when sidebar is closed on desktop */}
@@ -363,12 +366,7 @@ function App() {
         </button>
         <button
           type="button"
-          onClick={() => {
-            if (!isSidebarOpen) {
-              setIsSidebarOpen(true);
-            }
-            setShouldFocusSearch(true);
-          }}
+          onClick={() => setIsSearchModalOpen(true)}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] transition hover:bg-[var(--bg-control-hover)]"
           title="Search chats"
           aria-label="Search chats"
@@ -376,6 +374,14 @@ function App() {
           <Search className="h-5 w-5" aria-hidden />
         </button>
       </div>
+
+      {/* Search Modal */}
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        conversations={conversations}
+        onSelectConversation={handleSelectConversation}
+      />
 
       <div className="flex flex-1 flex-col">
         <header className="border-b border-[var(--border-strong)] bg-[var(--bg-panel)]/95 backdrop-blur-md transition-colors">

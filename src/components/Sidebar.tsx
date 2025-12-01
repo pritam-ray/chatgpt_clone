@@ -13,6 +13,7 @@ interface SidebarProps {
   onClose: () => void;
   shouldFocusSearch?: boolean;
   onSearchFocused?: () => void;
+  onOpenSearch?: () => void;
 }
 
 function formatRelativeTime(timestamp: number) {
@@ -42,27 +43,9 @@ export function Sidebar({
   onClose,
   shouldFocusSearch,
   onSearchFocused,
+  onOpenSearch,
 }: SidebarProps) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const filteredConversations = conversations.filter((conversation) => {
-    if (!searchQuery.trim()) return true;
-    const query = searchQuery.toLowerCase();
-    
-    // Search in conversation title
-    const title = (conversation.title || 'New chat').toLowerCase();
-    if (title.includes(query)) return true;
-    
-    // Search in message content (both user and assistant messages)
-    const hasMatchingMessage = conversation.messages.some((message) => {
-      const content = (message.displayContent || message.content || '').toLowerCase();
-      return content.includes(query);
-    });
-    
-    return hasMatchingMessage;
-  });
 
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
@@ -83,13 +66,6 @@ export function Sidebar({
       setOpenMenuId(null);
     }
   }, [isOpen]);
-
-  useEffect(() => {
-    if (shouldFocusSearch && searchInputRef.current) {
-      searchInputRef.current.focus();
-      onSearchFocused?.();
-    }
-  }, [shouldFocusSearch, onSearchFocused]);
 
   return (
     <aside
@@ -127,38 +103,24 @@ export function Sidebar({
       </div>
 
       <div className="sidebar-search">
-        <div className="search-input-wrapper">
+        <button
+          type="button"
+          className="search-input-wrapper cursor-pointer hover:bg-[var(--bg-control-hover)] transition"
+          onClick={onOpenSearch}
+        >
           <Search className="search-icon" aria-hidden />
-          <input
-            ref={searchInputRef}
-            type="text"
-            className="search-input"
-            placeholder="Search chats..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            aria-label="Search conversations"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              className="search-clear"
-              onClick={() => setSearchQuery('')}
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" aria-hidden />
-            </button>
-          )}
-        </div>
+          <span className="search-input text-left text-[var(--text-tertiary)]">
+            Search chats...
+          </span>
+        </button>
       </div>
 
       <nav className="sidebar-nav" aria-label="Recent conversations">
         {conversations.length === 0 ? (
           <p className="sidebar-empty">No conversations yet</p>
-        ) : filteredConversations.length === 0 ? (
-          <p className="sidebar-empty">No matching conversations</p>
         ) : (
           <ul className="conversation-list">
-            {filteredConversations.map((conversation) => {
+            {conversations.map((conversation) => {
               const isActive = conversation.id === activeConversationId;
               const fullTitle = conversation.title || 'New chat';
               const truncatedTitle = fullTitle.length > 20 ? `${fullTitle.slice(0, 20).trim()}…` : fullTitle;

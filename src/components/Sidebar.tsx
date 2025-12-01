@@ -93,7 +93,7 @@ export function Sidebar({
             {conversations.map((conversation) => {
               const isActive = conversation.id === activeConversationId;
               const fullTitle = conversation.title || 'New chat';
-              const truncatedTitle = fullTitle.length > 32 ? `${fullTitle.slice(0, 32).trim()}…` : fullTitle;
+              const truncatedTitle = fullTitle.length > 20 ? `${fullTitle.slice(0, 20).trim()}…` : fullTitle;
 
               return (
                 <li key={conversation.id} className="conversation-row">

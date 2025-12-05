@@ -89,6 +89,19 @@ function App() {
     scrollToBottom();
   }, [messages]);
 
+  // Clear highlighting when clicking anywhere
+  useEffect(() => {
+    const handleClick = () => {
+      if (highlightedMessageId) {
+        setHighlightedMessageId(undefined);
+        setSearchQueryForHighlight(undefined);
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [highlightedMessageId]);
+
   // Load conversations from database on mount
   useEffect(() => {
     const loadFromDatabase = async () => {
@@ -273,12 +286,6 @@ function App() {
           messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 100);
-      
-      // Clear highlight after 5 seconds
-      setTimeout(() => {
-        setHighlightedMessageId(undefined);
-        setSearchQueryForHighlight(undefined);
-      }, 5000);
     } else {
       setHighlightedMessageId(undefined);
       setSearchQueryForHighlight(undefined);

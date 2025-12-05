@@ -6,6 +6,8 @@ import 'katex/dist/katex.min.css';
 
 interface ChatMessageProps {
   message: Message;
+  isHighlighted?: boolean;
+  searchQuery?: string;
 }
 
 const COPY_ICON = `
@@ -20,11 +22,52 @@ const SUCCESS_ICON = `
   </svg>
 `;
 
-function MarkdownContent({ content }: { content: string }) {
+function MarkdownContent({ content, searchQuery }: { content: string; searchQuery?: string }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!contentRef.current) return;
+    
+    // Highlight search query if provided
+    if (searchQuery && searchQuery.trim()) {
+      const textNodes: Node[] = [];
+      const walker = document.createTreeWalker(
+        contentRef.current,
+        NodeFilter.SHOW_TEXT,
+        null
+      );
+      
+      let node;
+      while ((node = walker.nextNode())) {
+        textNodes.push(node);
+      }
+      
+      textNodes.forEach((textNode) => {
+        const text = textNode.textContent || '';
+        const lowerText = text.toLowerCase();
+        const lowerQuery = searchQuery.toLowerCase();
+        const index = lowerText.indexOf(lowerQuery);
+        
+        if (index !== -1 && textNode.parentElement) {
+          const before = text.slice(0, index);
+          const match = text.slice(index, index + searchQuery.length);
+          const after = text.slice(index + searchQuery.length);
+          
+          const span = document.createElement('span');
+          if (before) span.appendChild(document.createTextNode(before));
+          
+          const mark = document.createElement('mark');
+          mark.className = 'search-highlight-active';
+          mark.textContent = match;
+          span.appendChild(mark);
+          
+          if (after) span.appendChild(document.createTextNode(after));
+          
+          textNode.parentElement.replaceChild(span, textNode);
+        }
+      });
+    }
+    
     const codeBlocks = contentRef.current.querySelectorAll('pre.code-block');
 
     codeBlocks.forEach((block) => {
@@ -62,7 +105,7 @@ function MarkdownContent({ content }: { content: string }) {
 
       wrapper.appendChild(copyButton);
     });
-  }, [content]);
+  }, [content, searchQuery]);
 
   const html = renderMarkdownToHTML(content);
 
@@ -106,13 +149,13 @@ function AttachmentPreview({ attachment }: { attachment: Attachment }) {
   );
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, isHighlighted, searchQuery }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
   const label = isUser ? 'You' : isAssistant ? 'ChatGPT' : 'System';
   const displayContent = isUser ? message.displayContent || message.content : message.content;
 
-  const rowClass = `chat-row ${isUser ? 'chat-row-user' : 'chat-row-assistant'}`;
+  const rowClass = `chat-row ${isUser ? 'chat-row-user' : 'chat-row-assistant'} ${isHighlighted ? 'message-highlighted' : ''}`;
   const avatarClass = `chat-avatar ${
     isUser ? 'chat-avatar-user' : 'chat-avatar-assistant'
   }`;
@@ -122,7 +165,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const shouldShowHeader = !isUser;
 
   return (
-    <article className={rowClass}>
+    <article className={rowClass} data-message-id={message.id}>
       <div className={avatarClass} aria-hidden>
         {isUser ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
       </div>
@@ -134,9 +177,33 @@ export function ChatMessage({ message }: ChatMessageProps) {
         ) : null}
         <div className="chat-card-body">
           {isAssistant ? (
-            <MarkdownContent content={displayContent} />
+            <MarkdownContent content={displayContent} searchQuery={searchQuery} />
           ) : (
-            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text-primary)]">{displayContent}</p>
+            <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--text-primary)]">
+              {searchQuery && searchQuery.trim() ? (
+                (() => {
+                  const lowerContent = displayContent.toLowerCase();
+                  const lowerQuery = searchQuery.toLowerCase();
+                  const index = lowerContent.indexOf(lowerQuery);
+                  
+                  if (index === -1) return displayContent;
+                  
+                  const before = displayContent.slice(0, index);
+                  const match = displayContent.slice(index, index + searchQuery.length);
+                  const after = displayContent.slice(index + searchQuery.length);
+                  
+                  return (
+                    <>
+                      {before}
+                      <mark className="search-highlight-active">{match}</mark>
+                      {after}
+                    </>
+                  );
+                })()
+              ) : (
+                displayContent
+              )}
+            </p>
           )}
         </div>
         {message.attachments?.length ? (

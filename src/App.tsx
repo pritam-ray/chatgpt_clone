@@ -73,6 +73,8 @@ function App() {
   });
   const [shouldFocusSearch, setShouldFocusSearch] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | undefined>(undefined);
+  const [searchQueryForHighlight, setSearchQueryForHighlight] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { conversations, activeConversationId } = conversationState;
@@ -98,7 +100,10 @@ function App() {
           const mapped = dbConversations.map(conv => ({
             id: conv.id,
             title: conv.title,
-            messages: conv.messages || [],
+            messages: (conv.messages || []).map((msg: Message) => ({
+              ...msg,
+              id: msg.id || (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2, 11)),
+            })),
             createdAt: conv.created_at,
             updatedAt: conv.updated_at,
             azureResponseId: conv.azure_response_id,
@@ -236,7 +241,7 @@ function App() {
     }
   };
 
-  const handleSelectConversation = (conversationId: string) => {
+  const handleSelectConversation = (conversationId: string, messageId?: string, searchQuery?: string) => {
     setConversationState((prev) => {
       if (!prev.conversations.some((conversation) => conversation.id === conversationId)) {
         return prev;
@@ -255,6 +260,30 @@ function App() {
         activeConversationId: conversationId,
       };
     });
+    
+    // Set highlight info if provided
+    if (messageId && searchQuery) {
+      setHighlightedMessageId(messageId);
+      setSearchQueryForHighlight(searchQuery);
+      
+      // Scroll to the message after a short delay to ensure DOM is updated
+      setTimeout(() => {
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      
+      // Clear highlight after 5 seconds
+      setTimeout(() => {
+        setHighlightedMessageId(undefined);
+        setSearchQueryForHighlight(undefined);
+      }, 5000);
+    } else {
+      setHighlightedMessageId(undefined);
+      setSearchQueryForHighlight(undefined);
+    }
+    
     setIsSidebarOpen(false);
   };
 
@@ -298,6 +327,7 @@ function App() {
 
     const conversationId = activeConversation.id;
     const userMessage: Message = {
+      id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2, 11),
       role: 'user',
       content, // Full content for API
       displayContent: displayContent || content, // Display content for UI
@@ -341,6 +371,7 @@ function App() {
 
     try {
       const assistantMessage: Message = {
+        id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2, 11),
         role: 'assistant',
         content: '',
       };
@@ -590,7 +621,12 @@ function App() {
             ) : (
               <div className="space-y-4 pb-10">
                 {messages.map((message, index) => (
-                  <ChatMessage key={index} message={message} />
+                  <ChatMessage 
+                    key={index} 
+                    message={message}
+                    isHighlighted={highlightedMessageId === message.id}
+                    searchQuery={highlightedMessageId === message.id ? searchQueryForHighlight : undefined}
+                  />
                 ))}
                 {isLoading && messages[messages.length - 1]?.content === '' && (
                   <div className="chat-row chat-row-assistant">

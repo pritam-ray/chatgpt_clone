@@ -6,6 +6,7 @@ export type Attachment = {
 };
 
 export interface Message {
+  id?: string; // Optional: unique identifier for message (used for search highlighting)
   role: 'user' | 'assistant' | 'system';
   content: string;
   displayContent?: string; // Optional: content to display in UI (without file data)

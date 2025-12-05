@@ -6,7 +6,7 @@ interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   conversations: Conversation[];
-  onSelectConversation: (conversationId: string) => void;
+  onSelectConversation: (conversationId: string, messageId?: string, searchQuery?: string) => void;
 }
 
 interface SearchResult {
@@ -14,7 +14,8 @@ interface SearchResult {
   matchedIn: 'title' | 'message';
   matchedText?: string;
   messageIndex?: number;
-  role?: 'user' | 'assistant';
+  role?: 'user' | 'assistant' | 'system';
+  messageId?: string;
 }
 
 function highlightMatch(text: string, query: string): JSX.Element {
@@ -37,7 +38,7 @@ function highlightMatch(text: string, query: string): JSX.Element {
   return (
     <>
       {before}
-      <mark className="bg-[var(--accent)]/20 text-[var(--text-primary)] font-medium rounded px-0.5">
+      <mark className="search-highlight">
         {match}
       </mark>
       {after}
@@ -107,6 +108,7 @@ export function SearchModal({ isOpen, onClose, conversations, onSelectConversati
             matchedText: message.displayContent || message.content,
             messageIndex: index,
             role: message.role,
+            messageId: message.id,
           });
         }
       });
@@ -116,7 +118,11 @@ export function SearchModal({ isOpen, onClose, conversations, onSelectConversati
   }, [searchQuery, conversations]);
 
   const handleSelectResult = (result: SearchResult) => {
-    onSelectConversation(result.conversation.id);
+    onSelectConversation(
+      result.conversation.id,
+      result.messageId,
+      result.matchedIn === 'message' ? searchQuery : undefined
+    );
     onClose();
     setSearchQuery('');
   };

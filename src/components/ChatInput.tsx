@@ -44,7 +44,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      const attachmentType = file.type.startsWith('image/') ? 'image' : 'document';
+      const attachmentType = file.type.startsWith('image/') ? 'image' : 'pdf';
       
       setAttachment({
         type: attachmentType,
@@ -82,7 +82,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     if (attachment) {
       attachments.push(attachment);
       const icon = attachment.type === 'image' ? '🖼️' : '📎';
-      const label = attachment.type === 'image' ? 'Image' : 'Document';
+      const label = attachment.type === 'image' ? 'Image' : 'PDF';
       displayContent = displayContent
         ? `${displayContent}\n\n${icon} ${label} attached: ${attachment.fileName}`
         : `${icon} ${label} attached: ${attachment.fileName}`;
@@ -110,7 +110,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
                 </span>
                 {attachment && (
                   <span className="text-xs text-[var(--text-tertiary)]">
-                    {attachment.type === 'image' ? 'Image' : 'Document'} attachment
+                    {attachment.type === 'image' ? 'Image' : 'PDF'} attachment
                   </span>
                 )}
               </div>

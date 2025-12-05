@@ -351,18 +351,9 @@ function App() {
         updatedAt: Date.now(),
       }));
 
-      // Azure Response API currently doesn't support images/documents
-      // Check if current message has attachments
-      const hasCurrentAttachments = attachments && attachments.length > 0;
-      
-      // Check if any recent message (last 5 messages) has attachments
-      const recentMessages = conversationMessages.slice(-5); // Last 5 messages
-      const hasRecentAttachments = recentMessages.some(msg => msg.attachments && msg.attachments.length > 0);
-      
-      // Use Response API if:
-      // - No current attachments AND
-      // - No attachments in last 5 messages (old attachments beyond context window)
-      const canUseSessionAPI = azureResponseAPI.isConfigured() && !hasCurrentAttachments && !hasRecentAttachments;
+      // Azure Response API supports PDFs and images
+      // Always try to use Response API for token savings
+      const canUseSessionAPI = azureResponseAPI.isConfigured();
 
       let responseAPIFailed = false;
 
@@ -373,8 +364,47 @@ function App() {
         try {
           let responseId = activeConversation.azureResponseId;
           
+          // Format input for Response API
+          let input: any;
+          if (attachments && attachments.length > 0) {
+            // Multi-modal input with attachments
+            const contentParts: any[] = [];
+            
+            // Add text content
+            if (content.trim()) {
+              contentParts.push({
+                type: 'input_text',
+                text: content
+              });
+            }
+            
+            // Add file attachments
+            for (const attachment of attachments) {
+              if (attachment.type === 'image') {
+                contentParts.push({
+                  type: 'input_image',
+                  image_url: attachment.dataUrl
+                });
+              } else if (attachment.type === 'pdf') {
+                contentParts.push({
+                  type: 'input_file',
+                  filename: attachment.fileName,
+                  file_data: attachment.dataUrl
+                });
+              }
+            }
+            
+            input = [{
+              role: 'user',
+              content: contentParts
+            }];
+          } else {
+            // Simple text input
+            input = content;
+          }
+          
           // Only send current message - Azure maintains full history via previous_response_id
-          for await (const chunk of azureResponseAPI.streamWithContext(content, { 
+          for await (const chunk of azureResponseAPI.streamWithContext(input, { 
             previousResponseId: activeConversation.azureResponseId 
           })) {
             if (chunk.done) {
@@ -420,17 +450,11 @@ function App() {
       }
 
       // Use standard API if:
-      // 1. Has attachments in current message or recent history (images/documents need full context)
-      // 2. Response API not configured
-      // 3. Response API failed (fallback)
-      const needsStandardAPI = hasCurrentAttachments || hasRecentAttachments;
+      // 1. Response API not configured
+      // 2. Response API failed (fallback)
       
-      if (needsStandardAPI || !canUseSessionAPI || responseAPIFailed) {
-        if (hasCurrentAttachments) {
-          console.log('[App] Using standard Azure OpenAI (current message has attachments - multimodal support)');
-        } else if (hasRecentAttachments) {
-          console.log('[App] Using standard Azure OpenAI (recent attachments in context - full history with multimodal)');
-        } else if (responseAPIFailed) {
+      if (!canUseSessionAPI || responseAPIFailed) {
+        if (responseAPIFailed) {
           console.log('[App] Using standard Azure OpenAI (fallback mode)');
         } else {
           console.log('[App] Using standard Azure OpenAI (Response API unavailable)');

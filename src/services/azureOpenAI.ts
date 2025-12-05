@@ -1,7 +1,7 @@
 export type Attachment = {
-  type: 'image' | 'document';
+  type: 'image' | 'pdf';
   mimeType: string;
-  dataUrl: string; // base64 data URL for images and documents
+  dataUrl: string; // base64 data URL for images and PDFs
   fileName: string;
 };
 
@@ -44,7 +44,7 @@ function buildAzureMessages(messages: Message[]) {
               detail: 'auto',
             },
           });
-        } else if (attachment.type === 'document') {
+        } else if (attachment.type === 'pdf') {
           parts.push({
             type: 'image_url',
             image_url: {

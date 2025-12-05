@@ -45,7 +45,7 @@ export class AzureResponseAPI {
    * Azure maintains full context server-side - no need to send history!
    */
   async *streamWithContext(
-    currentMessage: string,
+    currentMessage: string | { role: string; content: Array<any> },
     options: ResponseAPIOptions = {}
   ): AsyncGenerator<{ content: string; responseId?: string; done?: boolean }> {
     if (!this.isConfigured()) {

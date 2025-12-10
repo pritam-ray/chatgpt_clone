@@ -1,9 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Moon, Sun, Menu, Bot, Plus, Search } from 'lucide-react';
+import { MessageSquare, Moon, Sun, Menu, Bot, Plus, Search, LogOut, User } from 'lucide-react';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { Sidebar } from './components/Sidebar';
 import { SearchModal } from './components/SearchModal';
+import { LoginPage } from './components/LoginPage';
+import { SignupPage } from './components/SignupPage';
+import { useAuth } from './contexts/AuthContext';
 import { Attachment, Message, streamChatCompletion } from './services/azureOpenAI';
 import { azureResponseAPI } from './services/azureResponseAPI';
 import * as api from './services/api';
@@ -64,6 +67,9 @@ function resolveInitialTheme(): Theme {
 }
 
 function App() {
+  const { isAuthenticated, user, logout } = useAuth();
+  const [showSignup, setShowSignup] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [conversationState, setConversationState] = useState<ConversationState>(() => loadInitialConversationState());
   const [isLoading, setIsLoading] = useState(false);
   const [theme, setTheme] = useState<Theme>(() => resolveInitialTheme());
@@ -101,6 +107,19 @@ function App() {
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, [highlightedMessageId]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (showUserMenu && !target.closest('[aria-label="User menu"]') && !target.closest('.absolute.right-0')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showUserMenu]);
 
   // Load conversations from database on mount
   useEffect(() => {
@@ -513,6 +532,15 @@ function App() {
     }
   };
 
+  // Show login/signup pages if not authenticated
+  if (!isAuthenticated) {
+    return showSignup ? (
+      <SignupPage onSwitchToLogin={() => setShowSignup(false)} />
+    ) : (
+      <LoginPage onSwitchToSignup={() => setShowSignup(true)} />
+    );
+  }
+
   return (
     <div className="flex h-screen bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-300">
       <div
@@ -592,7 +620,7 @@ function App() {
               <h1 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] truncate">ChatGPT Clone</h1>
               <p className="text-xs sm:text-sm text-[var(--text-tertiary)] truncate">Powered by Azure OpenAI</p>
             </div>
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex items-center gap-2">
               <button
                 type="button"
                 onClick={toggleTheme}
@@ -608,6 +636,39 @@ function App() {
                   {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                 </span>
               </button>
+              
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-control)] px-2 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-medium text-[var(--text-secondary)] transition hover:bg-[var(--bg-control-hover)]"
+                  aria-label="User menu"
+                >
+                  <User className="h-4 w-4 text-[var(--accent)]" />
+                  <span className="hidden sm:inline">{user?.username || 'User'}</span>
+                </button>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel)] shadow-lg z-50">
+                    <div className="p-3 border-b border-[var(--border-subtle)]">
+                      <p className="text-sm font-medium text-[var(--text-primary)]">{user?.username}</p>
+                      <p className="text-xs text-[var(--text-tertiary)] truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setShowUserMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-control-hover)] transition"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>

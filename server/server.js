@@ -1,14 +1,22 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
+
+const { authenticateToken, optionalAuth } = require('./middleware/auth');
+const createAuthRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json({ limit: '50mb' }));
+app.use(cookieParser());
 
 // MySQL connection pool
 const pool = mysql.createPool({
@@ -32,14 +40,20 @@ pool.getConnection()
   });
 
 // ========================================
+// Authentication Routes
+// ========================================
+app.use('/api/auth', createAuthRoutes(pool));
+
+// ========================================
 // Conversations Endpoints
 // ========================================
 
-// Get all conversations
-app.get('/api/conversations', async (req, res) => {
+// Get all conversations (protected)
+app.get('/api/conversations', authenticateToken, async (req, res) => {
   try {
     const [conversations] = await pool.query(
-      'SELECT * FROM conversations ORDER BY updated_at DESC'
+      'SELECT * FROM conversations WHERE user_id = ? ORDER BY updated_at DESC',
+      [req.user.id]
     );
     
     // Get messages for each conversation
@@ -68,14 +82,14 @@ app.get('/api/conversations', async (req, res) => {
   }
 });
 
-// Get single conversation by ID
-app.get('/api/conversations/:id', async (req, res) => {
+// Get single conversation by ID (protected)
+app.get('/api/conversations/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     
     const [conversations] = await pool.query(
-      'SELECT * FROM conversations WHERE id = ?',
-      [id]
+      'SELECT * FROM conversations WHERE id = ? AND user_id = ?',
+      [id, req.user.id]
     );
     
     if (conversations.length === 0) {
@@ -108,21 +122,22 @@ app.get('/api/conversations/:id', async (req, res) => {
   }
 });
 
-// Create new conversation
-app.post('/api/conversations', async (req, res) => {
+// Create new conversation (protected)
+app.post('/api/conversations', authenticateToken, async (req, res) => {
   try {
     const { id, title, azureResponseId } = req.body;
     const now = Date.now();
     
     await pool.query(
-      'INSERT INTO conversations (id, title, azure_response_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
-      [id, title || 'New chat', azureResponseId || null, now, now]
+      'INSERT INTO conversations (id, title, azure_response_id, user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)',
+      [id, title || 'New chat', azureResponseId || null, req.user.id, now, now]
     );
     
     res.status(201).json({
       id,
       title: title || 'New chat',
       azure_response_id: azureResponseId || null,
+      user_id: req.user.id,
       created_at: now,
       updated_at: now,
       messages: []
@@ -133,16 +148,16 @@ app.post('/api/conversations', async (req, res) => {
   }
 });
 
-// Update conversation title
-app.patch('/api/conversations/:id/title', async (req, res) => {
+// Update conversation title (protected)
+app.patch('/api/conversations/:id/title', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { title } = req.body;
     const now = Date.now();
     
     await pool.query(
-      'UPDATE conversations SET title = ?, updated_at = ? WHERE id = ?',
-      [title, now, id]
+      'UPDATE conversations SET title = ?, updated_at = ? WHERE id = ? AND user_id = ?',
+      [title, now, id, req.user.id]
     );
     
     res.json({ success: true });
@@ -152,16 +167,16 @@ app.patch('/api/conversations/:id/title', async (req, res) => {
   }
 });
 
-// Update conversation Azure response ID
-app.patch('/api/conversations/:id/response', async (req, res) => {
+// Update conversation Azure response ID (protected)
+app.patch('/api/conversations/:id/response', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { azureResponseId } = req.body;
     const now = Date.now();
     
     await pool.query(
-      'UPDATE conversations SET azure_response_id = ?, updated_at = ? WHERE id = ?',
-      [azureResponseId, now, id]
+      'UPDATE conversations SET azure_response_id = ?, updated_at = ? WHERE id = ? AND user_id = ?',
+      [azureResponseId, now, id, req.user.id]
     );
     
     res.json({ success: true });
@@ -171,13 +186,13 @@ app.patch('/api/conversations/:id/response', async (req, res) => {
   }
 });
 
-// Delete conversation
-app.delete('/api/conversations/:id', async (req, res) => {
+// Delete conversation (protected)
+app.delete('/api/conversations/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     
     // Delete will cascade to messages and attachments
-    await pool.query('DELETE FROM conversations WHERE id = ?', [id]);
+    await pool.query('DELETE FROM conversations WHERE id = ? AND user_id = ?', [id, req.user.id]);
     
     res.json({ success: true });
   } catch (error) {
@@ -190,8 +205,8 @@ app.delete('/api/conversations/:id', async (req, res) => {
 // Messages Endpoints
 // ========================================
 
-// Add message to conversation
-app.post('/api/conversations/:id/messages', async (req, res) => {
+// Add message to conversation (protected)
+app.post('/api/conversations/:id/messages', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { role, content, displayContent, attachments } = req.body;
@@ -253,8 +268,8 @@ app.post('/api/conversations/:id/messages', async (req, res) => {
 // Azure Session Management
 // ========================================
 
-// Create or update Azure session metadata
-app.post('/api/azure-sessions', async (req, res) => {
+// Create or update Azure session metadata (protected)
+app.post('/api/azure-sessions', authenticateToken, async (req, res) => {
   try {
     const { sessionId, conversationId, modelName, totalTokens } = req.body;
     const now = Date.now();
@@ -274,8 +289,8 @@ app.post('/api/azure-sessions', async (req, res) => {
   }
 });
 
-// Get Azure session by conversation ID
-app.get('/api/conversations/:id/session', async (req, res) => {
+// Get Azure session by conversation ID (protected)
+app.get('/api/conversations/:id/session', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     

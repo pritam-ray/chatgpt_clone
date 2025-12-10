@@ -10,7 +10,8 @@ A full-stack ChatGPT clone using Azure OpenAI Response API with session manageme
 ## ✨ Features
 
 - 🤖 **Azure OpenAI Integration** - Chat Completions API with Response API for session management
-- 💾 **MySQL Database** - Persistent storage for conversations, messages, and attachments
+- 🔐 **JWT Authentication** - Secure user authentication with access and refresh tokens
+- 💾 **MySQL Database** - Persistent storage for conversations, messages, and user accounts
 - 🔄 **Smart Context Management** - Azure session-based context reduces token costs by 60%+
 - 📎 **Multimodal Support** - Images, PDFs, and audio files
 - 🔍 **Search Functionality** - Search across all conversations with content snippets
@@ -18,6 +19,7 @@ A full-stack ChatGPT clone using Azure OpenAI Response API with session manageme
 - 📱 **Responsive Design** - Works seamlessly on desktop and mobile
 - 💬 **Advanced Markdown** - Full GFM support with math equations (KaTeX)
 - 📊 **Token Tracking** - Monitor and optimize API usage
+- 👤 **User Management** - Signup, login, logout, profile management, password change
 
 ## 🚀 Getting Started
 
@@ -28,16 +30,24 @@ A full-stack ChatGPT clone using Azure OpenAI Response API with session manageme
 
 ### 1. Database Setup
 
-Open MySQL Workbench and execute the `database_setup.sql` file:
+Open MySQL Workbench and execute both SQL files:
 
-```sql
--- This creates:
--- - chatbot database
--- - conversations table (with azure_session_id)
--- - messages table
--- - attachments table
--- - azure_sessions table (optional, for tracking)
+```bash
+# First, create the base database and tables
+mysql -u root -p < database_setup.sql
+
+# Then, add authentication tables
+mysql -u root -p < database_auth_migration.sql
 ```
+
+This creates:
+- `chatbot` database
+- `conversations` table (with user_id and azure_session_id)
+- `messages` table
+- `attachments` table
+- `users` table (for authentication)
+- `refresh_tokens` table (for session management)
+- `azure_sessions` table (optional, for tracking)
 
 ### 2. Backend Setup
 
@@ -47,17 +57,21 @@ npm install
 
 # Create .env file from example
 cp .env.example .env
-# Edit server/.env with your MySQL credentials:
+# Edit server/.env with your configuration:
 # DB_HOST=localhost
 # DB_USER=root
 # DB_PASSWORD=your_password
 # DB_NAME=chatbot
+# JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+# JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-this-in-production
 
 # Start server
 npm start
 ```
 
 Server runs on `http://localhost:4000`
+
+**Security Note:** Generate strong random secrets for JWT_SECRET and JWT_REFRESH_SECRET in production!
 
 ### 3. Frontend Setup
 
@@ -78,6 +92,38 @@ npm run dev
 ```
 
 Frontend runs on `http://localhost:5173`
+
+## 🔐 Authentication System
+
+The application includes a complete JWT-based authentication system:
+
+### Features
+- **User Registration** - Secure signup with email, username, and password
+- **Login/Logout** - Session management with access and refresh tokens
+- **Password Security** - bcrypt hashing with salt rounds
+- **Token Management** - Short-lived access tokens (15min) and long-lived refresh tokens (7 days)
+- **User Isolation** - Each user sees only their own conversations and messages
+- **Profile Management** - Update username, email, and password
+- **Automatic Refresh** - Seamless token refresh on expiration
+
+### Quick Start
+1. Run the authentication migration: `mysql -u root -p < database_auth_migration.sql`
+2. Set JWT secrets in `server/.env`:
+   ```
+   JWT_SECRET=your-secret-key
+   JWT_REFRESH_SECRET=your-refresh-key
+   ```
+3. Restart the server
+4. Open the app - you'll see the login page
+5. Click "Sign up" to create an account
+
+### Detailed Documentation
+See [AUTHENTICATION_SETUP.md](./AUTHENTICATION_SETUP.md) for:
+- Complete API documentation
+- Security best practices
+- Token refresh implementation
+- Production deployment considerations
+- Troubleshooting guide
 
 ## 🏗️ Architecture
 

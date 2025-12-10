@@ -947,7 +947,7 @@ export function markdownToPlainText(markdown: string): string {
   
   let text = markdown;
   
-  // Convert headers to plain text with newlines
+  // Convert headers to plain text with proper spacing
   text = text.replace(/^#{1,6}\s+(.+)$/gm, '$1\n');
   
   // Convert bold/italic to plain text (remove markers)
@@ -957,36 +957,52 @@ export function markdownToPlainText(markdown: string): string {
   text = text.replace(/__(.+?)__/g, '$1'); // bold
   text = text.replace(/_(.+?)_/g, '$1'); // italic
   
-  // Convert inline code to plain text
+  // Convert inline code to plain text (preserve content)
   text = text.replace(/`([^`]+)`/g, '$1');
   
-  // Convert code blocks to indented text
+  // Convert code blocks with proper formatting
   text = text.replace(/```[\w]*\n([\s\S]*?)```/g, (match, code) => {
-    return code.split('\n').map((line: string) => line).join('\n') + '\n';
+    return '\n' + code.trim() + '\n\n';
   });
   
-  // Convert links to just the text or URL
-  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1 ($2)');
+  // Convert links to just the text (show URL only for external links)
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    // If text and URL are different, show both
+    if (text.toLowerCase() !== url.toLowerCase()) {
+      return `${text} (${url})`;
+    }
+    return text;
+  });
   
-  // Convert images to alt text
-  text = text.replace(/!\[([^\]]*)\]\([^)]+\)/g, '[Image: $1]');
+  // Convert images to descriptive text
+  text = text.replace(/!\[([^\]]*)\]\([^)]+\)/g, (match, alt) => {
+    return alt ? `[Image: ${alt}]` : '[Image]';
+  });
   
-  // Convert bullet lists
+  // Convert bullet lists with proper spacing
   text = text.replace(/^\s*[-*+]\s+(.+)$/gm, '• $1');
   
-  // Convert numbered lists
-  text = text.replace(/^\s*\d+\.\s+(.+)$/gm, (match, item) => {
-    return item;
-  });
+  // Convert numbered lists (preserve numbers)
+  text = text.replace(/^\s*(\d+)\.\s+(.+)$/gm, '$1. $2');
   
-  // Convert blockquotes
+  // Convert blockquotes with spacing
   text = text.replace(/^>\s+(.+)$/gm, '$1');
   
   // Convert horizontal rules
-  text = text.replace(/^[-*_]{3,}$/gm, '---');
+  text = text.replace(/^[-*_]{3,}$/gm, '\n---\n');
   
-  // Clean up extra whitespace but preserve paragraph breaks
+  // Handle markdown section breaks (---)
+  text = text.replace(/\s*---\s*/g, '\n\n---\n\n');
+  
+  // Clean up excessive whitespace but preserve paragraph breaks
   text = text.replace(/\n{3,}/g, '\n\n');
+  
+  // Clean up spaces around newlines
+  text = text.replace(/ +\n/g, '\n');
+  text = text.replace(/\n +/g, '\n');
+  
+  // Ensure proper spacing after periods and punctuation
+  text = text.replace(/([.!?])([A-Z])/g, '$1 $2');
   
   // Trim leading/trailing whitespace
   text = text.trim();

@@ -113,6 +113,10 @@ body {
   @apply leading-relaxed;
   color: var(--text-primary);
   transition: color 0.3s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 /* Headings */
@@ -536,6 +540,11 @@ body {
 
 .chat-card-body {
   color: var(--text-primary);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .chat-row-user .chat-card-body {

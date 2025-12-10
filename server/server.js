@@ -264,6 +264,40 @@ app.post('/api/conversations/:id/messages', authenticateToken, async (req, res) 
   }
 });
 
+// Delete last message from conversation (protected)
+app.delete('/api/conversations/:id/messages/last', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const now = Date.now();
+    
+    // Get the last message ID for this conversation
+    const [messages] = await pool.query(
+      'SELECT id FROM messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT 1',
+      [id]
+    );
+    
+    if (messages.length === 0) {
+      return res.status(404).json({ error: 'No messages found' });
+    }
+    
+    const messageId = messages[0].id;
+    
+    // Delete the message (attachments will cascade delete)
+    await pool.query('DELETE FROM messages WHERE id = ?', [messageId]);
+    
+    // Update conversation updated_at
+    await pool.query(
+      'UPDATE conversations SET updated_at = ? WHERE id = ?',
+      [now, id]
+    );
+    
+    res.json({ success: true, deletedMessageId: messageId });
+  } catch (error) {
+    console.error('Error deleting last message:', error);
+    res.status(500).json({ error: 'Failed to delete message' });
+  }
+});
+
 // ========================================
 // Azure Session Management
 // ========================================

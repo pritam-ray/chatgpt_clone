@@ -145,18 +145,38 @@ function App() {
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | undefined>(undefined);
   const [searchQueryForHighlight, setSearchQueryForHighlight] = useState<string | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastScrollTime = useRef<number>(0);
 
   const { conversations, activeConversationId } = conversationState;
   const activeConversation = conversations.find((conversation) => conversation.id === activeConversationId) || conversations[0];
   const messages = activeConversation?.messages ?? [];
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (immediate = false) => {
+    const now = Date.now();
+    // Throttle scrolling to every 100ms during streaming
+    if (!immediate && now - lastScrollTime.current < 100) {
+      // Schedule a delayed scroll
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        lastScrollTime.current = Date.now();
+      }, 100);
+      return;
+    }
+    
+    lastScrollTime.current = now;
+    messagesEndRef.current?.scrollIntoView({ behavior: immediate ? 'auto' : 'smooth', block: 'end' });
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll when not streaming or when messages change significantly
+    if (!isLoading) {
+      scrollToBottom(true);
+    }
+  }, [messages.length, isLoading]);
 
   // Clear highlighting when clicking anywhere
   useEffect(() => {
@@ -562,14 +582,21 @@ function App() {
 
             assistantMessage.content += chunk.content;
 
-            updateConversationById(conversationId, (conversation) => {
-              const updated = [...conversation.messages];
-              const lastIndex = updated.length - 1;
-              if (lastIndex >= 0) {
-                updated[lastIndex] = { ...updated[lastIndex], content: assistantMessage.content };
-              }
-              return { ...conversation, messages: updated, updatedAt: Date.now() };
-            });
+            // Batch updates: only update state every few chunks to reduce re-renders
+            const contentLength = assistantMessage.content.length;
+            const shouldUpdate = contentLength % 50 === 0 || chunk.content.includes('\n');
+            
+            if (shouldUpdate) {
+              updateConversationById(conversationId, (conversation) => {
+                const updated = [...conversation.messages];
+                const lastIndex = updated.length - 1;
+                if (lastIndex >= 0) {
+                  updated[lastIndex] = { ...updated[lastIndex], content: assistantMessage.content };
+                }
+                return { ...conversation, messages: updated, updatedAt: Date.now() };
+              });
+              scrollToBottom();
+            }
           }
         } catch (error) {
           console.error('[App] Response API error:', error);
@@ -590,16 +617,33 @@ function App() {
 
           assistantMessage.content += chunk;
 
-          updateConversationById(conversationId, (conversation) => {
-            const updated = [...conversation.messages];
-            const lastIndex = updated.length - 1;
-            if (lastIndex >= 0) {
-              updated[lastIndex] = { ...updated[lastIndex], content: assistantMessage.content };
-            }
-            return { ...conversation, messages: updated, updatedAt: Date.now() };
-          });
+          // Batch updates: only update state every few chunks to reduce re-renders
+          const contentLength = assistantMessage.content.length;
+          const shouldUpdate = contentLength % 50 === 0 || chunk.includes('\n');
+          
+          if (shouldUpdate) {
+            updateConversationById(conversationId, (conversation) => {
+              const updated = [...conversation.messages];
+              const lastIndex = updated.length - 1;
+              if (lastIndex >= 0) {
+                updated[lastIndex] = { ...updated[lastIndex], content: assistantMessage.content };
+              }
+              return { ...conversation, messages: updated, updatedAt: Date.now() };
+            });
+            scrollToBottom();
+          }
         }
       }
+
+      // Final update to ensure all content is displayed
+      updateConversationById(conversationId, (conversation) => {
+        const updated = [...conversation.messages];
+        const lastIndex = updated.length - 1;
+        if (lastIndex >= 0) {
+          updated[lastIndex] = { ...updated[lastIndex], content: assistantMessage.content };
+        }
+        return { ...conversation, messages: updated, updatedAt: Date.now() };
+      });
 
       // Save assistant message to database after streaming completes
       if (assistantMessage.content) {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { User, Bot, Image as ImageIcon, FileText } from 'lucide-react';
 import type { Attachment, Message } from '../services/azureOpenAI';
 import { renderMarkdownToHTML } from '../utils/markdown';
@@ -163,6 +163,18 @@ export function ChatMessage({ message, isHighlighted, searchQuery }: ChatMessage
     isUser ? 'chat-card-user' : isAssistant ? 'chat-card-assistant' : 'chat-card-system'
   }`;
   const shouldShowHeader = !isUser;
+  const [copied, setCopied] = useState(false);
+
+  const copyMessageToClipboard = async () => {
+    try {
+      const textToCopy = isAssistant ? (message.content || '') : (displayContent || '');
+      await navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy message:', err);
+    }
+  };
 
   return (
     <article className={rowClass} data-message-id={message.id}>
@@ -213,6 +225,19 @@ export function ChatMessage({ message, isHighlighted, searchQuery }: ChatMessage
             ))}
           </div>
         ) : null}
+        {/* Copy message button (copies raw content for assistant, display content for user) */}
+        <div className="mt-2 px-3 pb-3">
+          <button
+            type="button"
+            onClick={copyMessageToClipboard}
+            className={`copy-message-button inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] hover:bg-[var(--bg-control-hover)]`}
+            title="Copy message"
+            aria-label="Copy message"
+          >
+            <span dangerouslySetInnerHTML={{ __html: copied ? SUCCESS_ICON : COPY_ICON }} />
+            <span>{copied ? 'Copied' : 'Copy'}</span>
+          </button>
+        </div>
       </div>
     </article>
   );

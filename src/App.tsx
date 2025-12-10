@@ -134,6 +134,7 @@ function App() {
   // const [showUserMenu, setShowUserMenu] = useState(false);
   const [conversationState, setConversationState] = useState<ConversationState>(() => loadInitialConversationState());
   const [isLoading, setIsLoading] = useState(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [theme, setTheme] = useState<Theme>(() => resolveInitialTheme());
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -376,6 +377,14 @@ function App() {
     setIsSidebarOpen(false);
   };
 
+  const handleStopGeneration = () => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+      setIsLoading(false);
+    }
+  };
+
   const handleNewConversation = async () => {
     // Check if the current active conversation is already empty
     const currentActive = conversations.find((c) => c.id === activeConversationId);
@@ -447,6 +456,8 @@ function App() {
     }));
 
     setIsLoading(true);
+    const controller = new AbortController();
+    setAbortController(controller);
 
     try {
       const assistantMessage: Message = {
@@ -499,6 +510,11 @@ function App() {
           for await (const chunk of azureResponseAPI.streamWithContext(input, { 
             previousResponseId: activeConversation.azureResponseId 
           })) {
+            // Check if generation was stopped
+            if (controller.signal.aborted) {
+              break;
+            }
+
             if (chunk.done) {
               if (chunk.responseId) {
                 responseId = chunk.responseId;
@@ -539,6 +555,11 @@ function App() {
         const messageHistory = updatedMessages.slice(-MAX_CONTEXT_MESSAGES);
 
         for await (const chunk of streamChatCompletion(messageHistory)) {
+          // Check if generation was stopped
+          if (controller.signal.aborted) {
+            break;
+          }
+
           assistantMessage.content += chunk;
 
           updateConversationById(conversationId, (conversation) => {
@@ -585,12 +606,17 @@ function App() {
           console.error('Failed to generate/update conversation title:', error);
         }
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Sorry, I encountered an error processing your request. Please try again.',
-      };
+    } catch (error: any) {
+      // Check if it was aborted by user
+      if (error.name === 'AbortError' || controller.signal.aborted) {
+        console.log('Generation stopped by user');
+        // Keep the partial response that was generated
+      } else {
+        console.error('Error sending message:', error);
+        const errorMessage: Message = {
+          role: 'assistant',
+          content: 'Sorry, I encountered an error processing your request. Please try again.',
+        };
       updateConversationById(conversationId, (conversation) => {
         const updated = [...conversation.messages];
         if (updated.length && updated[updated.length - 1].role === 'assistant') {
@@ -605,7 +631,9 @@ function App() {
           updatedAt: Date.now(),
         };
       });
+      }
     } finally {
+      setAbortController(null);
       setIsLoading(false);
     }
   };
@@ -800,7 +828,7 @@ function App() {
           </div>
         </main>
 
-        <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+        <ChatInput onSend={handleSendMessage} isGenerating={isLoading} onStop={handleStopGeneration} />
       </div>
     </div>
   );

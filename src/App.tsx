@@ -435,14 +435,120 @@ function App() {
       ...conversation,
       messages: updatedMessages,
     }));
-    
-    // Resend the last user message to generate a new response
-    await handleSendMessage(
-      lastUserMessage.content,
-      lastUserMessage.displayContent,
-      undefined,
-      lastUserMessage.attachments
-    );
+
+    const conversationId = activeConversation.id;
+    setIsLoading(true);
+    const controller = new AbortController();
+    setAbortController(controller);
+
+    try {
+      // Create new assistant message for the regenerated response
+      const assistantMessage: Message = {
+        id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2, 11),
+        role: 'assistant',
+        content: '',
+      };
+
+      updateConversationById(conversationId, (conversation) => ({
+        ...conversation,
+        messages: [...updatedMessages, assistantMessage],
+        updatedAt: Date.now(),
+      }));
+
+      // Use the existing Azure Response API logic
+      if (azureResponseAPI.isConfigured()) {
+        console.log('[Regenerate] Using Azure Response API');
+        
+        try {
+          // Format input for Response API (same as handleSendMessage)
+          let input: any;
+          if (lastUserMessage.attachments && lastUserMessage.attachments.length > 0) {
+            const contentParts: any[] = [];
+            
+            if (lastUserMessage.content.trim()) {
+              contentParts.push({ type: 'input_text', text: lastUserMessage.content });
+            }
+            
+            for (const attachment of lastUserMessage.attachments) {
+              if (attachment.type === 'image') {
+                contentParts.push({ type: 'input_image', image_url: attachment.dataUrl });
+              } else if (attachment.type === 'pdf') {
+                contentParts.push({ 
+                  type: 'input_file', 
+                  filename: attachment.fileName, 
+                  file_data: attachment.dataUrl 
+                });
+              }
+            }
+            
+            input = contentParts;
+          } else {
+            input = lastUserMessage.content;
+          }
+
+          // Call Azure Response API
+          const response = await azureResponseAPI.sendMessage(
+            input,
+            activeConversation.azureResponseId,
+            (chunk) => {
+              updateConversationById(conversationId, (conversation) => {
+                const msgs = conversation.messages;
+                const lastMsg = msgs[msgs.length - 1];
+                if (lastMsg && lastMsg.role === 'assistant') {
+                  return {
+                    ...conversation,
+                    messages: [
+                      ...msgs.slice(0, -1),
+                      { ...lastMsg, content: lastMsg.content + chunk },
+                    ],
+                  };
+                }
+                return conversation;
+              });
+            },
+            controller.signal
+          );
+
+          // Save to database
+          const finalMessages = [...updatedMessages, { ...assistantMessage, content: response.content }];
+          const lastAssistant = finalMessages[finalMessages.length - 1];
+          
+          try {
+            await api.addMessage(
+              conversationId,
+              'assistant',
+              lastAssistant.content,
+              lastAssistant.content
+            );
+
+            if (response.responseId) {
+              await api.updateConversationResponse(conversationId, response.responseId);
+              updateConversationById(conversationId, (conversation) => ({
+                ...conversation,
+                azureResponseId: response.responseId,
+              }));
+            }
+          } catch (error) {
+            console.error('Failed to save regenerated response:', error);
+          }
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.log('[Regenerate] Request cancelled');
+          } else {
+            console.error('[Regenerate] Azure Response API error:', error);
+            throw error;
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error('Regenerate error:', error);
+      if (error.name !== 'AbortError') {
+        alert('Failed to regenerate response. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+      setAbortController(null);
+    }
   };
 
   const handleNewConversation = async () => {

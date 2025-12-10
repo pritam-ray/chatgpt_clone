@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { User, Bot, Image as ImageIcon, FileText } from 'lucide-react';
+import { User, Bot, Image as ImageIcon, FileText, RotateCw } from 'lucide-react';
 import type { Attachment, Message } from '../services/azureOpenAI';
 import { renderMarkdownToHTML } from '../utils/markdown';
 import 'katex/dist/katex.min.css';
@@ -8,6 +8,8 @@ interface ChatMessageProps {
   message: Message;
   isHighlighted?: boolean;
   searchQuery?: string;
+  onRegenerate?: () => void;
+  isLastAssistantMessage?: boolean;
 }
 
 const COPY_ICON = `
@@ -149,7 +151,7 @@ function AttachmentPreview({ attachment }: { attachment: Attachment }) {
   );
 }
 
-export function ChatMessage({ message, isHighlighted, searchQuery }: ChatMessageProps) {
+export function ChatMessage({ message, isHighlighted, searchQuery, onRegenerate, isLastAssistantMessage }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
   const label = isUser ? 'You' : isAssistant ? 'ChatGPT' : 'System';
@@ -225,18 +227,30 @@ export function ChatMessage({ message, isHighlighted, searchQuery }: ChatMessage
             ))}
           </div>
         ) : null}
-        {/* Copy message button (copies raw content for assistant, display content for user) */}
-        <div className="flex justify-end mt-2 px-3 pb-3">
+        {/* Action buttons: Copy and Regenerate (for assistant messages) */}
+        <div className="message-actions flex items-center gap-2 mt-2 px-3 pb-3">
           <button
             type="button"
             onClick={copyMessageToClipboard}
-            className={`copy-message-button inline-flex items-center gap-2 rounded-md px-3 py-1 text-sm border border-[var(--border-subtle)] bg-[var(--bg-control)] text-[var(--text-primary)] hover:bg-[var(--bg-control-hover)]`}
+            className="message-action-btn inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs"
             title="Copy message"
             aria-label="Copy message"
           >
-            <span dangerouslySetInnerHTML={{ __html: copied ? SUCCESS_ICON : COPY_ICON }} />
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            <span className="action-icon" dangerouslySetInnerHTML={{ __html: copied ? SUCCESS_ICON : COPY_ICON }} />
+            <span>{copied ? 'Copied!' : 'Copy'}</span>
           </button>
+          {isAssistant && isLastAssistantMessage && onRegenerate && (
+            <button
+              type="button"
+              onClick={onRegenerate}
+              className="message-action-btn inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs"
+              title="Regenerate response"
+              aria-label="Regenerate response"
+            >
+              <RotateCw className="h-3.5 w-3.5" />
+              <span>Regenerate</span>
+            </button>
+          )}
         </div>
       </div>
     </article>

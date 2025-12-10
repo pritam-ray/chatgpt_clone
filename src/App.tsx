@@ -385,6 +385,34 @@ function App() {
     }
   };
 
+  const handleRegenerateResponse = async () => {
+    if (!activeConversation || isLoading) return;
+    
+    const messages = activeConversation.messages;
+    if (messages.length < 2) return; // Need at least a user message and assistant response
+    
+    // Remove the last assistant message
+    const lastUserMessageIndex = messages.length - 2;
+    const lastUserMessage = messages[lastUserMessageIndex];
+    
+    if (lastUserMessage.role !== 'user') return;
+    
+    // Remove last assistant message from state and database
+    const updatedMessages = messages.slice(0, -1);
+    updateConversationById(activeConversation.id, (conversation) => ({
+      ...conversation,
+      messages: updatedMessages,
+    }));
+    
+    // Resend the last user message
+    await handleSendMessage(
+      lastUserMessage.content,
+      lastUserMessage.displayContent,
+      undefined,
+      lastUserMessage.attachments
+    );
+  };
+
   const handleNewConversation = async () => {
     // Check if the current active conversation is already empty
     const currentActive = conversations.find((c) => c.id === activeConversationId);
@@ -795,14 +823,19 @@ function App() {
               </div>
             ) : (
               <div className="space-y-4 pb-10">
-                {messages.map((message, index) => (
-                  <ChatMessage 
-                    key={index} 
-                    message={message}
-                    isHighlighted={highlightedMessageId === message.id}
-                    searchQuery={highlightedMessageId === message.id ? searchQueryForHighlight : undefined}
-                  />
-                ))}
+                {messages.map((message, index) => {
+                  const isLastAssistant = message.role === 'assistant' && index === messages.length - 1;
+                  return (
+                    <ChatMessage 
+                      key={index} 
+                      message={message}
+                      isHighlighted={highlightedMessageId === message.id}
+                      searchQuery={highlightedMessageId === message.id ? searchQueryForHighlight : undefined}
+                      onRegenerate={isLastAssistant ? handleRegenerateResponse : undefined}
+                      isLastAssistantMessage={isLastAssistant}
+                    />
+                  );
+                })}
                 {isLoading && messages[messages.length - 1]?.content === '' && (
                   <div className="chat-row chat-row-assistant">
                     <div className="chat-avatar chat-avatar-assistant">

@@ -62,7 +62,7 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
           </div>
 
           <div className="bg-[var(--bg-panel)] rounded-2xl border border-[var(--border-strong)] p-8 shadow-xl">
-            {/* Development Mode - Show Token */}
+              {/* Development Mode - Show Token with Reset Link */}
             {resetToken && (
               <div className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg px-4 py-3 mb-4">
                 <p className="text-yellow-500 text-sm font-medium mb-2">Development Mode</p>
@@ -71,16 +71,20 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                   type="text"
                   value={resetToken}
                   readOnly
-                  className="w-full px-3 py-2 bg-[var(--bg-control)] border border-[var(--border-subtle)] rounded text-xs font-mono text-[var(--text-primary)]"
+                  className="w-full px-3 py-2 bg-[var(--bg-control)] border border-[var(--border-subtle)] rounded text-xs font-mono text-[var(--text-primary)] mb-3"
                   onClick={(e) => e.currentTarget.select()}
                 />
-                <p className="text-xs text-[var(--text-secondary)] mt-2">
-                  Use this token on the reset password page
+                <a
+                  href={`${window.location.origin}?token=${resetToken}`}
+                  className="block w-full px-4 py-2 bg-[var(--accent)] text-white rounded-lg hover:bg-[var(--accent)]/90 transition font-medium text-center text-sm"
+                >
+                  Go to Reset Password Page
+                </a>
+                <p className="text-xs text-[var(--text-secondary)] mt-2 text-center">
+                  Or click the link above to reset your password
                 </p>
               </div>
-            )}
-
-            <div className="space-y-4">
+            )}            <div className="space-y-4">
               <div className="bg-[var(--bg-control)] rounded-lg p-4 border border-[var(--border-subtle)]">
                 <h3 className="font-medium text-[var(--text-primary)] mb-2">What's next?</h3>
                 <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
@@ -99,13 +103,25 @@ export function ForgotPasswordPage({ onBack }: ForgotPasswordPageProps) {
                 </ul>
               </div>
 
-              <button
-                onClick={onBack}
-                className="w-full px-4 py-3 bg-[var(--bg-hover)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-control)] transition font-medium flex items-center justify-center gap-2"
-              >
-                <ArrowLeft className="h-5 w-5" />
-                Back to Sign In
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={onBack}
+                  className="w-full px-4 py-3 bg-[var(--bg-hover)] text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-control)] transition font-medium flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                  Back to Sign In
+                </button>
+                
+                <div className="text-center">
+                  <p className="text-xs text-[var(--text-tertiary)] mb-2">Already have a reset token?</p>
+                  <a
+                    href="/?reset=true"
+                    className="text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium transition"
+                  >
+                    Enter Reset Token
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>

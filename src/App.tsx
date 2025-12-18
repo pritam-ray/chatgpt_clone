@@ -8,6 +8,7 @@ import { LoginPage } from './components/LoginPage';
 import { SignupPage } from './components/SignupPage';
 import { ForgotPasswordPage } from './components/ForgotPasswordPage';
 import { ResetPasswordPage } from './components/ResetPasswordPage';
+import { TokenEntryPage } from './components/TokenEntryPage';
 import { ProfilePage } from './components/ProfilePage';
 import { useAuth } from './contexts/AuthContext';
 import { Attachment, Message, streamChatCompletion } from './services/azureOpenAI';
@@ -136,6 +137,7 @@ function App() {
   const [showSignup, setShowSignup] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showTokenEntry, setShowTokenEntry] = useState(false);
   const [resetToken, setResetToken] = useState('');
   const [showProfile, setShowProfile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -920,14 +922,25 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    // Check for reset token in URL
-    if (!showResetPassword && !resetToken) {
+    // Check for reset token or reset flag in URL
+    if (!showResetPassword && !resetToken && !showTokenEntry) {
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
+      const resetFlag = urlParams.get('reset');
+      const forgotFlag = urlParams.get('forgot');
+      
       if (token) {
         setResetToken(token);
         setShowResetPassword(true);
         // Clear token from URL
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (resetFlag === 'true') {
+        setShowTokenEntry(true);
+        // Clear flag from URL
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (forgotFlag === 'true') {
+        setShowForgotPassword(true);
+        // Clear flag from URL
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
@@ -941,7 +954,25 @@ function App() {
             setResetToken('');
             setShowSignup(false);
             setShowForgotPassword(false);
+            setShowTokenEntry(false);
           }} 
+        />
+      );
+    }
+
+    if (showTokenEntry) {
+      return (
+        <TokenEntryPage
+          onSubmit={(token) => {
+            setResetToken(token);
+            setShowTokenEntry(false);
+            setShowResetPassword(true);
+          }}
+          onBack={() => {
+            setShowTokenEntry(false);
+            setShowSignup(false);
+            setShowForgotPassword(false);
+          }}
         />
       );
     }

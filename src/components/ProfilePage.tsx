@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { User, Mail, Lock, Eye, EyeOff, Loader2, Check, X } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Loader2, Check, X, ArrowLeft } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
 
-export function ProfilePage({ onClose }: { onClose: () => void }) {
-  const { user, accessToken } = useAuth();
+export function ProfilePage({ onBack }: { onBack: () => void }) {
+  const { user, accessToken, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,8 +16,8 @@ export function ProfilePage({ onClose }: { onClose: () => void }) {
   // Profile form state
   const [formData, setFormData] = useState({
     username: user?.username || '',
-    firstName: '',
-    lastName: '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
   });
 
   // Password form state
@@ -81,12 +81,14 @@ export function ProfilePage({ onClose }: { onClose: () => void }) {
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setIsEditing(false);
       
-      // Update user in localStorage
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        userData.username = data.user.username;
-        localStorage.setItem('user', JSON.stringify(userData));
+      // Update user in context and localStorage with complete data
+      if (user) {
+        updateUser({
+          ...user,
+          username: data.user.username,
+          firstName: data.user.first_name,
+          lastName: data.user.last_name,
+        });
       }
       
       setTimeout(() => setMessage(null), 3000);
@@ -151,10 +153,16 @@ export function ProfilePage({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--bg-panel)] rounded-2xl border border-[var(--border-strong)] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className="flex h-screen bg-[var(--bg-app)]">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full">
         {/* Header */}
-        <div className="sticky top-0 bg-[var(--bg-panel)] border-b border-[var(--border-subtle)] p-6 flex items-center justify-between">
+        <div className="sticky top-0 bg-[var(--bg-app)] border-b border-[var(--border-subtle)] p-6 flex items-center gap-4 z-10">
+          <button
+            onClick={onBack}
+            className="p-2 rounded-lg hover:bg-[var(--bg-hover)] transition"
+          >
+            <ArrowLeft className="h-5 w-5 text-[var(--text-secondary)]" />
+          </button>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-[var(--accent-muted-bg)] flex items-center justify-center">
               <User className="h-6 w-6 text-[var(--accent)]" />
@@ -164,13 +172,9 @@ export function ProfilePage({ onClose }: { onClose: () => void }) {
               <p className="text-sm text-[var(--text-secondary)]">Manage your account information</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-[var(--bg-hover)] transition"
-          >
-            <X className="h-5 w-5 text-[var(--text-secondary)]" />
-          </button>
         </div>
+        
+        <div className="flex-1 overflow-y-auto">
 
         <div className="p-6 space-y-6">
           {/* Message */}
@@ -410,6 +414,7 @@ export function ProfilePage({ onClose }: { onClose: () => void }) {
               </form>
             )}
           </div>
+        </div>
         </div>
       </div>
     </div>

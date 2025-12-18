@@ -4,6 +4,8 @@ interface User {
   id: string;
   email: string;
   username: string;
+  firstName?: string;
+  lastName?: string;
 }
 
 interface AuthContextType {
@@ -14,6 +16,7 @@ interface AuthContextType {
   signup: (email: string, username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<boolean>;
+  updateUser: (user: User) => void;
   isLoading: boolean;
   isAuthenticated: boolean;
 }
@@ -27,6 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Function to update user data
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -184,6 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signup,
         logout,
         refreshAccessToken,
+        updateUser,
         isLoading,
         isAuthenticated: !!user,
       }}

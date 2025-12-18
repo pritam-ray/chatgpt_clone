@@ -967,6 +967,11 @@ function App() {
     );
   }
 
+  // Show profile page as a separate screen
+  if (showProfile) {
+    return <ProfilePage onBack={() => setShowProfile(false)} />;
+  }
+
   return (
     <div className="flex h-screen bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-300">
       <div
@@ -1082,7 +1087,7 @@ function App() {
               </button>
               
               {/* User Menu */}
-              <div className="relative">
+              <div className="relative z-50">
                 <button
                   type="button"
                   onClick={() => setShowUserMenu(!showUserMenu)}
@@ -1094,7 +1099,7 @@ function App() {
                 </button>
                 
                 {showUserMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel)] shadow-lg z-50">
+                  <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel)] shadow-lg z-[60]">
                     <div className="p-3 border-b border-[var(--border-subtle)]">
                       <p className="text-sm font-medium text-[var(--text-primary)]">{user?.username}</p>
                       <p className="text-xs text-[var(--text-tertiary)] truncate">{user?.email}</p>
@@ -1183,9 +1188,6 @@ function App() {
 
         <ChatInput onSend={handleSendMessage} isGenerating={isLoading} onStop={handleStopGeneration} />
       </div>
-
-      {/* Profile Modal */}
-      {showProfile && <ProfilePage onClose={() => setShowProfile(false)} />}
     </div>
   );
 }

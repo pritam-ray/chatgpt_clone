@@ -1052,7 +1052,7 @@ function App() {
       />
 
       <div className="flex flex-1 flex-col">
-        <header className="border-b border-[var(--border-strong)] bg-[var(--bg-panel)]/95 backdrop-blur-md transition-colors">
+        <header className="border-b border-[var(--border-strong)] bg-[var(--bg-panel)]/95 backdrop-blur-md transition-colors relative z-40">
           <div className="flex w-full items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 sm:py-4">
             <button
               type="button"

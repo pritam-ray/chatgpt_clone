@@ -48,127 +48,255 @@ const sendPasswordResetEmail = async (to, resetToken) => {
     subject: 'Password Reset Request - ChatGPT Clone',
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Reset Your Password</title>
         <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
           body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
+            color: #202124;
+            background-color: #f8f9fa;
             padding: 20px;
           }
-          .container {
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            padding: 30px;
-            border: 1px solid #e0e0e0;
+          .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
           }
           .header {
+            background: linear-gradient(135deg, #10a37f 0%, #0d8c6d 100%);
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
           }
           .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ffffffff;
+            font-size: 32px;
             margin-bottom: 10px;
           }
+          .header-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+          }
           .content {
-            background-color: white;
-            padding: 25px;
-            border-radius: 8px;
+            padding: 40px 30px;
+          }
+          .greeting {
+            font-size: 18px;
+            font-weight: 500;
+            color: #202124;
             margin-bottom: 20px;
           }
-          .button {
+          .message {
+            font-size: 16px;
+            color: #5f6368;
+            margin-bottom: 30px;
+            line-height: 1.7;
+          }
+          .cta-container {
+            text-align: center;
+            margin: 35px 0;
+          }
+          .cta-button {
             display: inline-block;
-            padding: 14px 30px;
-            background-color: #004d3aff;
-            color: white;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #10a37f 0%, #0d8c6d 100%);
+            color: #ffffff !important;
             text-decoration: none;
             border-radius: 6px;
+            font-size: 16px;
             font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(16, 163, 127, 0.3);
+          }
+          .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 163, 127, 0.4);
+          }
+          .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+          }
+          .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e8eaed;
+          }
+          .divider-text {
+            background: #ffffff;
+            padding: 0 15px;
+            color: #5f6368;
+            font-size: 14px;
+            position: relative;
+            display: inline-block;
+          }
+          .link-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e8eaed;
+            border-radius: 6px;
+            padding: 15px;
             margin: 20px 0;
           }
-          .button:hover {
-            background-color: #0d8c6d;
+          .link-text {
+            color: #1a73e8;
+            font-size: 13px;
+            word-break: break-all;
+            text-decoration: none;
+          }
+          .warning-box {
+            background-color: #fef7e0;
+            border-left: 4px solid #f9ab00;
+            padding: 16px;
+            margin: 25px 0;
+            border-radius: 4px;
+          }
+          .warning-title {
+            color: #b06000;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          .warning-text {
+            color: #b06000;
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          .security-note {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 30px;
+          }
+          .security-note p {
+            font-size: 14px;
+            color: #5f6368;
+            margin: 0;
           }
           .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
             text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-top: 20px;
+            border-top: 1px solid #e8eaed;
           }
-          .warning {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 20px;
-            color: #856404;
-          }
-          .code-box {
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            word-break: break-all;
-            margin: 15px 0;
+          .footer-text {
             font-size: 13px;
+            color: #5f6368;
+            margin: 5px 0;
+          }
+          .footer-logo {
+            color: #80868b;
+            font-size: 12px;
+            margin-top: 15px;
+          }
+          @media only screen and (max-width: 600px) {
+            .content {
+              padding: 30px 20px;
+            }
+            .cta-button {
+              padding: 14px 30px;
+              font-size: 15px;
+            }
           }
         </style>
       </head>
       <body>
-        <div class="container">
+        <div class="email-container">
+          <!-- Header -->
           <div class="header">
-            <div class="logo">🤖 ChatGPT Clone</div>
-            <h2 style="margin: 0; color: #333;">Password Reset Request</h2>
+            <div class="logo">💬</div>
+            <h1 class="header-title">Reset Your Password</h1>
           </div>
-          
+
+          <!-- Main Content -->
           <div class="content">
-            <p>Hello,</p>
-            <p>We received a request to reset your password. Click the button below to create a new password:</p>
+            <p class="greeting">Hello,</p>
             
-            <div style="text-align: center;">
-              <a href="${resetUrl}" class="button">Reset Your Password</a>
+            <p class="message">
+              We received a request to reset the password for your ChatGPT Clone account. 
+              To proceed with resetting your password, please click the button below:
+            </p>
+
+            <div class="cta-container">
+              <a href="${resetUrl}" class="cta-button">Reset Password</a>
             </div>
-            
-            <p style="margin-top: 20px;">Or copy and paste this link into your browser:</p>
-            <div class="code-box">${resetUrl}</div>
-            
-            <div class="warning">
-              <strong>⏰ Important:</strong> This link will expire in <strong>1 hour</strong> for security reasons.
+
+            <div class="divider">
+              <span class="divider-text">Or use this link</span>
             </div>
-            
-            <p style="margin-top: 20px;">If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.</p>
+
+            <div class="link-box">
+              <a href="${resetUrl}" class="link-text">${resetUrl}</a>
+            </div>
+
+            <div class="warning-box">
+              <div class="warning-title">
+                <span>⏰</span>
+                <span>Time-Sensitive</span>
+              </div>
+              <p class="warning-text">
+                This password reset link will expire in <strong>1 hour</strong> for your security.
+              </p>
+            </div>
+
+            <div class="security-note">
+              <p>
+                <strong>Didn't request this?</strong><br>
+                If you didn't request a password reset, you can safely ignore this email. 
+                Your password will remain unchanged and your account is secure.
+              </p>
+            </div>
           </div>
-          
+
+          <!-- Footer -->
           <div class="footer">
-            <p>This is an automated message, please do not reply to this email.</p>
-            <p style="color: #999; font-size: 12px;">ChatGPT Clone &copy; 2025</p>
+            <p class="footer-text">This is an automated message from ChatGPT Clone.</p>
+            <p class="footer-text">Please do not reply to this email.</p>
+            <p class="footer-logo">© 2025 ChatGPT Clone. All rights reserved.</p>
           </div>
         </div>
       </body>
       </html>
     `,
     text: `
-Password Reset Request
+RESET YOUR PASSWORD
 
 Hello,
 
-We received a request to reset your password. Click the link below or copy it into your browser to create a new password:
+We received a request to reset the password for your ChatGPT Clone account.
+
+To proceed with resetting your password, please copy and paste this link into your browser:
 
 ${resetUrl}
 
-This link will expire in 1 hour for security reasons.
+⏰ TIME-SENSITIVE: This password reset link will expire in 1 hour for your security.
 
-If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+DIDN'T REQUEST THIS?
+If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged and your account is secure.
 
 ---
-ChatGPT Clone
-This is an automated message, please do not reply to this email.
+This is an automated message from ChatGPT Clone.
+Please do not reply to this email.
+
+© 2025 ChatGPT Clone. All rights reserved.
     `,
   };
 

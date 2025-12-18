@@ -240,7 +240,7 @@ function createAuthRoutes(pool) {
   router.get('/me', authenticateToken, async (req, res) => {
     try {
       const [users] = await pool.query(
-        'SELECT id, email, username, created_at, last_login_at FROM users WHERE id = ?',
+        'SELECT id, email, username, first_name, last_name, created_at, last_login_at FROM users WHERE id = ?',
         [req.user.id]
       );
 

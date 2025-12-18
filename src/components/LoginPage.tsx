@@ -4,9 +4,10 @@ import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 interface LoginPageProps {
   onSwitchToSignup: () => void;
+  onForgotPassword: () => void;
 }
 
-export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
+export function LoginPage({ onSwitchToSignup, onForgotPassword }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -110,6 +111,17 @@ export function LoginPage({ onSwitchToSignup }: LoginPageProps) {
                 'Sign In'
               )}
             </button>
+
+            {/* Forgot Password Link */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={onForgotPassword}
+                className="text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium transition"
+              >
+                Forgot password?
+              </button>
+            </div>
           </form>
 
           {/* Switch to Signup */}

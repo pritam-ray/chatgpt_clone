@@ -334,6 +334,177 @@ function createAuthRoutes(pool) {
     }
   });
 
+  // ========================================
+  // Forgot Password - Request Reset
+  // ========================================
+  router.post('/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      // Find user
+      const [users] = await pool.query(
+        'SELECT id, email FROM users WHERE email = ? AND is_active = TRUE',
+        [email.toLowerCase()]
+      );
+
+      // Always return success to prevent email enumeration
+      if (users.length === 0) {
+        return res.json({ message: 'If an account exists, a reset link will be sent' });
+      }
+
+      const user = users[0];
+      
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const now = Date.now();
+      const expiresAt = now + (60 * 60 * 1000); // 1 hour
+
+      // Store token
+      await pool.query(
+        'INSERT INTO password_reset_tokens (user_id, token, expires_at, created_at) VALUES (?, ?, ?, ?)',
+        [user.id, resetToken, expiresAt, now]
+      );
+
+      // In production, send email here
+      console.log(`Password reset token for ${email}: ${resetToken}`);
+      console.log(`Reset link: http://localhost:5173/reset-password?token=${resetToken}`);
+
+      res.json({ 
+        message: 'If an account exists, a reset link will be sent',
+        // Only include token in development
+        ...(process.env.NODE_ENV !== 'production' && { resetToken })
+      });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ error: 'Failed to process request' });
+    }
+  });
+
+  // ========================================
+  // Reset Password - Verify Token & Set New Password
+  // ========================================
+  router.post('/reset-password', async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      if (!token || !newPassword) {
+        return res.status(400).json({ error: 'Token and new password are required' });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+
+      const now = Date.now();
+
+      // Find valid token
+      const [tokens] = await pool.query(
+        'SELECT * FROM password_reset_tokens WHERE token = ? AND used = FALSE AND expires_at > ?',
+        [token, now]
+      );
+
+      if (tokens.length === 0) {
+        return res.status(400).json({ error: 'Invalid or expired reset token' });
+      }
+
+      const resetToken = tokens[0];
+
+      // Hash new password
+      const passwordHash = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await pool.query(
+        'UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?',
+        [passwordHash, now, resetToken.user_id]
+      );
+
+      // Mark token as used
+      await pool.query(
+        'UPDATE password_reset_tokens SET used = TRUE WHERE id = ?',
+        [resetToken.id]
+      );
+
+      // Revoke all refresh tokens
+      await pool.query(
+        'UPDATE refresh_tokens SET revoked = TRUE WHERE user_id = ?',
+        [resetToken.user_id]
+      );
+
+      res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+      console.error('Reset password error:', error);
+      res.status(500).json({ error: 'Failed to reset password' });
+    }
+  });
+
+  // ========================================
+  // Update Profile
+  // ========================================
+  router.patch('/profile', authenticateToken, async (req, res) => {
+    try {
+      const { username, firstName, lastName } = req.body;
+      const updates = [];
+      const values = [];
+
+      if (username !== undefined) {
+        // Check if username is already taken by another user
+        const [existingUsers] = await pool.query(
+          'SELECT id FROM users WHERE username = ? AND id != ?',
+          [username, req.user.id]
+        );
+
+        if (existingUsers.length > 0) {
+          return res.status(409).json({ error: 'Username already taken' });
+        }
+
+        updates.push('username = ?');
+        values.push(username);
+      }
+
+      if (firstName !== undefined) {
+        updates.push('first_name = ?');
+        values.push(firstName || null);
+      }
+
+      if (lastName !== undefined) {
+        updates.push('last_name = ?');
+        values.push(lastName || null);
+      }
+
+      if (updates.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+      }
+
+      updates.push('updated_at = ?');
+      const now = Date.now();
+      values.push(now);
+      values.push(req.user.id);
+
+      await pool.query(
+        `UPDATE users SET ${updates.join(', ')} WHERE id = ?`,
+        values
+      );
+
+      // Get updated user data
+      const [users] = await pool.query(
+        'SELECT id, email, username, first_name, last_name, created_at FROM users WHERE id = ?',
+        [req.user.id]
+      );
+
+      res.json({ 
+        message: 'Profile updated successfully',
+        user: users[0]
+      });
+    } catch (error) {
+      console.error('Update profile error:', error);
+      res.status(500).json({ error: 'Failed to update profile' });
+    }
+  });
+
   return router;
 }
 

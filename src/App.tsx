@@ -6,6 +6,9 @@ import { Sidebar } from './components/Sidebar';
 import { SearchModal } from './components/SearchModal';
 import { LoginPage } from './components/LoginPage';
 import { SignupPage } from './components/SignupPage';
+import { ForgotPasswordPage } from './components/ForgotPasswordPage';
+import { ResetPasswordPage } from './components/ResetPasswordPage';
+import { ProfilePage } from './components/ProfilePage';
 import { useAuth } from './contexts/AuthContext';
 import { Attachment, Message, streamChatCompletion } from './services/azureOpenAI';
 import { azureResponseAPI } from './services/azureResponseAPI';
@@ -131,6 +134,10 @@ function resolveInitialTheme(): Theme {
 function App() {
   const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
   const [showSignup, setShowSignup] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [showProfile, setShowProfile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [conversationState, setConversationState] = useState<ConversationState>(() => loadInitialConversationState());
   const [isLoading, setIsLoading] = useState(false);
@@ -913,10 +920,50 @@ function App() {
   }
 
   if (!isAuthenticated) {
+    // Check for reset token in URL
+    if (!showResetPassword && !resetToken) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      if (token) {
+        setResetToken(token);
+        setShowResetPassword(true);
+        // Clear token from URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
+    if (showResetPassword && resetToken) {
+      return (
+        <ResetPasswordPage 
+          token={resetToken} 
+          onSuccess={() => {
+            setShowResetPassword(false);
+            setResetToken('');
+            setShowSignup(false);
+            setShowForgotPassword(false);
+          }} 
+        />
+      );
+    }
+
+    if (showForgotPassword) {
+      return (
+        <ForgotPasswordPage 
+          onBack={() => {
+            setShowForgotPassword(false);
+            setShowSignup(false);
+          }} 
+        />
+      );
+    }
+
     return showSignup ? (
       <SignupPage onSwitchToLogin={() => setShowSignup(false)} />
     ) : (
-      <LoginPage onSwitchToSignup={() => setShowSignup(true)} />
+      <LoginPage 
+        onSwitchToSignup={() => setShowSignup(true)}
+        onForgotPassword={() => setShowForgotPassword(true)}
+      />
     );
   }
 
@@ -1055,10 +1102,21 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        logout();
+                        setShowProfile(true);
                         setShowUserMenu(false);
                       }}
                       className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-control-hover)] transition"
+                    >
+                      <User className="h-4 w-4" />
+                      Profile Settings
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setShowUserMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-control-hover)] transition border-t border-[var(--border-subtle)]"
                     >
                       <LogOut className="h-4 w-4" />
                       Logout
@@ -1125,6 +1183,9 @@ function App() {
 
         <ChatInput onSend={handleSendMessage} isGenerating={isLoading} onStop={handleStopGeneration} />
       </div>
+
+      {/* Profile Modal */}
+      {showProfile && <ProfilePage onClose={() => setShowProfile(false)} />}
     </div>
   );
 }

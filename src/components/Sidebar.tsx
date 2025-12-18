@@ -82,7 +82,6 @@ export function Sidebar({
     <aside
       className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'} bg-[var(--bg-panel)] text-[var(--text-primary)]`}
       aria-label="Chat history"
-      aria-hidden={!isOpen}
     >
       <div className="sidebar-header">
         <button

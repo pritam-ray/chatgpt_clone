@@ -751,7 +751,6 @@ function App() {
 
     const conversationMessages = activeConversation.messages;
     const updatedMessages = [...conversationMessages, userMessage];
-    const isFirstMessage = conversationMessages.length === 0;
 
     // Save user message to database
     try {

@@ -253,10 +253,13 @@ function App() {
           
           // Check if there's a stored active conversation ID from previous session
           const storedActiveId = window.localStorage.getItem(ACTIVE_CONVERSATION_KEY);
+          console.log('Stored conversation ID:', storedActiveId);
+          console.log('Available conversations:', sorted.map(c => c.id));
           // Only restore if the conversation exists in database (has messages)
           const activeId = storedActiveId && sorted.some(c => c.id === storedActiveId) 
             ? storedActiveId 
             : null; // Show welcome page if no stored conversation or it doesn't exist in database
+          console.log('Restoring conversation ID:', activeId);
           
           setConversationState({
             conversations: sorted,
@@ -736,9 +739,12 @@ function App() {
     if (isFirstMessage) {
       try {
         await api.createConversation(conversationId, activeConversation.title);
-      } catch (error) {
-        console.error('Failed to create conversation in database:', error);
-        // Continue anyway - conversation exists in local state
+        console.log('Conversation created in database:', conversationId);
+      } catch (error: any) {
+        // If conversation already exists, that's fine - continue
+        if (!error.message?.includes('already exists')) {
+          console.error('Failed to create conversation in database:', error);
+        }
       }
     }
     const userMessage: Message = {

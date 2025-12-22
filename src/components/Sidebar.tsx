@@ -218,7 +218,7 @@ export function Sidebar({
           </button>
 
           {showUserMenu && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel)] shadow-lg">
+            <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-panel)] shadow-lg z-50">
               <button
                 type="button"
                 onClick={() => {

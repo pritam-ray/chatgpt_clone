@@ -280,13 +280,14 @@ function App() {
     loadFromDatabase();
   }, [isAuthenticated, authLoading]);
 
-  // Save active conversation ID to localStorage
+  // Save active conversation ID to localStorage (only when it changes to a valid ID)
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    // Only update localStorage when we have a valid conversation ID
+    // Don't clear it when setting to null during initial load
     if (activeConversationId) {
+      console.log('Saving conversation ID to localStorage:', activeConversationId);
       window.localStorage.setItem(ACTIVE_CONVERSATION_KEY, activeConversationId);
-    } else {
-      window.localStorage.removeItem(ACTIVE_CONVERSATION_KEY);
     }
   }, [activeConversationId]);
 

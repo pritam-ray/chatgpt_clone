@@ -151,7 +151,7 @@ cd Personalized-chatbot
 Open MySQL Workbench or command line and execute:
 
 ```bash
-mysql -u root -p < complete_database_setup.sql
+mysql -u root -p < DATABASE_SETUP.sql
 ```
 
 This creates:
@@ -618,7 +618,7 @@ chatbot/
 │   └── .env                    # Backend config (create this)
 │
 ├── public/                      # Static assets
-├── complete_database_setup.sql  # Database initialization
+├── DATABASE_SETUP.sql           # Complete database initialization
 ├── package.json                # Frontend dependencies
 ├── vite.config.ts              # Vite configuration
 ├── tailwind.config.js          # TailwindCSS config

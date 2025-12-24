@@ -117,14 +117,16 @@ class WebSearchService {
   /**
    * Process a query with web search capability
    */
-  async processQuery(userMessage, conversationHistory = []) {
+  async processQuery(userMessage, conversationHistory = [], forceSearch = true) {
     try {
-      // Check if web search is needed
-      const needsSearch = await this.shouldUseWebSearch(userMessage);
+      console.log('[WebSearchService] Process query. Force search:', forceSearch);
+      // Always search when web search is explicitly enabled
+      const needsSearch = forceSearch;
       let searchResults = '';
       
       if (needsSearch) {
         searchResults = await this.performWebSearch(userMessage);
+        console.log('[WebSearchService] Search results obtained:', searchResults.length, 'chars');
       }
 
       // Build conversation messages
@@ -176,13 +178,12 @@ class WebSearchService {
    */
   async processQueryStream(userMessage, conversationHistory = [], onToken) {
     try {
-      // Check if web search is needed
-      const needsSearch = await this.shouldUseWebSearch(userMessage);
+      // ALWAYS search since this endpoint is only called when web search button is enabled
+      const needsSearch = true;
       let searchResults = '';
       
-      if (needsSearch) {
-        searchResults = await this.performWebSearch(userMessage);
-      }
+      searchResults = await this.performWebSearch(userMessage);
+      console.log('[WebSearchService] Search completed. Results length:', searchResults.length);
 
       // Build conversation messages
       const messages = [

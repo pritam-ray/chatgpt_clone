@@ -749,6 +749,8 @@ function App() {
     attachments?: Attachment[],
     useWebSearch?: boolean,
   ) => {
+    console.log('[App] handleSendMessage called with useWebSearch:', useWebSearch);
+    
     // If no active conversation, create one first
     if (!activeConversation) {
       const conversation = createConversation();

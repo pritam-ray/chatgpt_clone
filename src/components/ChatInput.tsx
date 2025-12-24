@@ -79,6 +79,8 @@ export function ChatInput({ onSend, isGenerating, onStop, webSearchEnabled = fal
       return;
     }
 
+    console.log('[ChatInput] Submitting with webSearchEnabled:', webSearchEnabled);
+
     let displayContent = trimmedInput;
     const attachments: Attachment[] = [];
 
